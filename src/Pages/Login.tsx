@@ -42,16 +42,18 @@ function Login() {
 
   const styles = {
     container: {
-      background: "linear-gradient(to right, #ff7e5f, #feb47b)",
+      backgroundImage: `url(${"https://www.oxfordscholastica.com/wp-content/uploads/2023/07/cambridge-college.jpg"})`,
+      backgroundSize: "cover",
+      display: "flex",
+      justifyContent: "center",
       height: "100vh",
-      paddingTop: "30vh",
     },
     card: {
-      maxWidth: 400,
+      width: 400,
       margin: "auto",
       padding: "20px",
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-      borderRadius: "10px",
+      borderRadius: "20px",
       backgroundColor: "#fff",
     },
   };
