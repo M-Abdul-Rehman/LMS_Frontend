@@ -13,6 +13,7 @@ import { registerStudent } from '../../api/studentApi';
 
 const RegisterStudent: React.FC = () => {
   const [formData, setFormData] = useState({
+    studentId:'',
     firstName: '',
     lastName: '',
     session: '',
@@ -29,15 +30,40 @@ const RegisterStudent: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await registerStudent(formData);
-      setSnackbar({ open: true, message: 'Student registered successfully!', severity: 'success' });
-      setFormData({ firstName: '', lastName: '', session: '', department: '', rollNumber: '',email:'', password: '' }); // Reset form
-    } catch (err) {
-      setSnackbar({ open: true, message: 'Registration failed.', severity: 'error' });
-    }
-  };
+  e.preventDefault();
+  try {
+    const studId = `${formData.session}-${formData.department}-${formData.rollNumber}`;
+    const newStudent = { ...formData, studentId: studId }; // construct updated object
+
+    console.log(newStudent.studentId); // ✅ will log correct value
+
+    await registerStudent(newStudent);
+
+    setSnackbar({
+      open: true,
+      message: 'Student registered successfully!',
+      severity: 'success',
+    });
+
+    setFormData({
+      studentId: '',
+      firstName: '',
+      lastName: '',
+      session: '',
+      department: '',
+      rollNumber: '',
+      email: '',
+      password: '',
+    });
+  } catch (err) {
+    setSnackbar({
+      open: true,
+      message: 'Registration failed.',
+      severity: 'error',
+    });
+  }
+};
+
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>

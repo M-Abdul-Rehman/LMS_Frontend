@@ -12,7 +12,7 @@ import {
   FormControl,
   Typography,
 } from "@mui/material";
-import { fetchAllStudents } from "../api/studentApi";
+import { fetchStudentById } from "../api/studentApi";
 import { useNavigate } from "react-router";
 
 const sessions = ["Fa2020", "Fa2021", "Fa2022", "Fa2023"];
@@ -25,19 +25,23 @@ function Login() {
   const [password, setPassword] = useState("");
   let navigate = useNavigate();
   const handleLogin = () => {
-    fetchAllStudents().then((students) => {
-      students.forEach((student:any) => {
-        if (
-          student.session === session &&
-          student.department === department &&
-          student.rollNumber === rollNumber &&
-          student.password === password
-        ) {
-          
-          navigate('/home')
+    if (!session || !department || !rollNumber || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+    const studentId = `${session}-${department}-${rollNumber}`;
+    fetchStudentById(studentId)
+      .then((student) => {
+        if (student.studentId && student.password === password) {
+          navigate("/home")
+        } else {
+          alert("Invalid credentials");
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching students:", error);
+        alert("Login failed. Please try again.");
       });
-    });
   };
 
   const styles = {
