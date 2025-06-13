@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 export interface StudentData {
-  id?: string;
+  studentId?: string;
   firstName?: string;
   lastName?: string;
   session?: string;
@@ -37,33 +37,33 @@ export const fetchAllStudents = async () => {
 };
 
 // 🔹 Get a single student by ID
-export const fetchStudentById = async (id: string) => {
+export const fetchStudentById = async (studentId: string) => {
   try {
-    const response = await axios.get(`${BASE_URL}/${id}`);
+    const response = await axios.get(`${BASE_URL}/${studentId}`);
     return response.data;
   } catch (error: any) {
-    console.error(`Error fetching student with ID ${id}:`, error);
+    console.error(`Error fetching student with ID ${studentId}:`, error);
     throw error.response?.data || error;
   }
 };
 
 // 🔹 Update a student
-export const updateStudent = async (id: string, data: Partial<StudentData>) => {
+export const updateStudent = async (studentId: string, data: Partial<StudentData>) => {
   try {
-    const response = await axios.put(`${BASE_URL}/${id}`, data);
+    const response = await axios.put(`${BASE_URL}/${studentId}`, data);
     return response.data;
   } catch (error: any) {
-    console.error(`Error updating student with ID ${id}:`, error);
+    console.error(`Error updating student with ID ${studentId}:`, error);
     throw error.response?.data || error;
   }
 };
 
 // 🔹 Delete a student
-export const deleteStudent = async (id: string) => {
+export const deleteStudent = async (studentId: string) => {
   try {
-    await axios.delete(`${BASE_URL}/${id}`);
+    await axios.delete(`${BASE_URL}/${studentId}`);
   } catch (error: any) {
-    console.error(`Error deleting student with ID ${id}:`, error);
+    console.error(`Error deleting student with ID ${studentId}:`, error);
     throw error.response?.data || error;
   }
 };
