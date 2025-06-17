@@ -12,7 +12,7 @@ import {
   FormControl,
   Typography,
 } from "@mui/material";
-import { fetchStudentById } from "../api/studentApi";
+import { loginStudent } from "../api/studentApi";
 import { useNavigate } from "react-router";
 
 const sessions = ["Fa2020", "Fa2021", "Fa2022", "Fa2023"];
@@ -24,24 +24,23 @@ function Login() {
   const [rollNumber, setRollNumber] = useState("");
   const [password, setPassword] = useState("");
   let navigate = useNavigate();
-  const handleLogin = () => {
+  const handleLogin = async() => {
     if (!session || !department || !rollNumber || !password) {
       alert("Please fill all fields");
       return;
     }
+
     const studentId = `${session}-${department}-${rollNumber}`;
-    fetchStudentById(studentId)
-      .then((student) => {
-        if (student.studentId && student.password === password) {
-          navigate("/home")
-        } else {
-          alert("Invalid credentials");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching students:", error);
-        alert("Login failed. Please try again.");
-      });
+
+    try {
+      const res = await loginStudent(studentId, password);
+      localStorage.setItem("token", res.access_token);
+      localStorage.setItem("student", JSON.stringify(res.student));
+      navigate("/home");
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Invalid credentials. Please try again.");
+    }
   };
 
   const styles = {

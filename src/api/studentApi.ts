@@ -67,3 +67,11 @@ export const deleteStudent = async (studentId: string) => {
     throw error.response?.data || error;
   }
 };
+
+export const loginStudent = async (studentId: string, password: string) => {
+  const response = await axios.post('http://localhost:5000/auth/login', {
+    studentId,
+    password,
+  });
+  return response.data;
+};
