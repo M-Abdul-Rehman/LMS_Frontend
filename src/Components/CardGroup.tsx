@@ -5,6 +5,9 @@ import SchoolIcon from "@mui/icons-material/School";
 import PeopleIcon from "@mui/icons-material/People";
 
 function CardGroup() {
+  const student = localStorage.getItem("student");
+  const studentData = student ? JSON.parse(student) : null;
+  console.log(studentData);
     const styles={
         cardGroup: {
               display: "flex",
@@ -17,7 +20,7 @@ function CardGroup() {
               flex: "1 1 200px",
               minWidth: "300px",
               backgroundColor: "#ffffff",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              boxShadow: "6px 6px 20px rgb(54, 54, 54)",
               borderRadius: "8px",
               display: "flex",
               justifyContent: "space-between",
@@ -46,7 +49,7 @@ function CardGroup() {
             color="textSecondary"
             sx={{ opacity: 0.5 }}
           >
-            Fa2021
+            {studentData ? studentData.session : "N/A"}
           </Typography>
         </Box>
       </Card>
