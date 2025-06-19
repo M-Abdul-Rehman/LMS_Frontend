@@ -1,10 +1,19 @@
-import { AppBar, Box, Button, Typography } from "@mui/material";
+import { AppBar, Box, Button, CircularProgress, Typography } from "@mui/material";
 import NavDrawer from "../Components/NavDrawer";
 import CardGroup from "../Components/CardGroup";
 import DataTables from "../Components/DataTables";
 import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 
 function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const styles = {
     wrapper: {
       display: "flex",
@@ -29,34 +38,49 @@ function Home() {
       marginTop: "60px",
       marginLeft: "90px",
     },
+    loaderContainer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100vh",
+      width: "100vw",
+    },
   };
-  const navigate = useNavigate();
+
+  if (isLoading) {
     return (
-      <Box sx={styles.wrapper}>
-        <NavDrawer />
-        <AppBar sx={styles.appbar}>
-          <Typography variant="h5" color="initial" sx={{ opacity: 0.8 }}>
-            Learning Management System
-          </Typography>
-          <Button
-            onClick={() => {
-              localStorage.removeItem("student");
-              localStorage.removeItem("token");
-              navigate("/");
-            }}
-          >
-            Logout
-          </Button>
-        </AppBar>
-        <Box sx={styles.dashboard}>
-          <Typography variant="h4" color="initial">
-            Dashboard:
-          </Typography>
-          <CardGroup />
-          <DataTables />
-        </Box>
+      <Box sx={styles.loaderContainer}>
+        <CircularProgress />
       </Box>
     );
   }
+
+  return (
+    <Box sx={styles.wrapper}>
+      <NavDrawer />
+      <AppBar sx={styles.appbar}>
+        <Typography variant="h5" color="initial" sx={{ opacity: 0.8 }}>
+          Learning Management System
+        </Typography>
+        <Button
+          onClick={() => {
+            localStorage.removeItem("student");
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+        >
+          Logout
+        </Button>
+      </AppBar>
+      <Box sx={styles.dashboard}>
+        <Typography variant="h4" color="initial">
+          Dashboard:
+        </Typography>
+        <CardGroup />
+        <DataTables />
+      </Box>
+    </Box>
+  );
+}
 
 export default Home;

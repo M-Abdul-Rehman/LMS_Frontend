@@ -18,7 +18,7 @@ function CardGroup() {
             },
             card: {
               flex: "1 1 200px",
-              minWidth: "300px",
+              minWidth: "250px",
               backgroundColor: "#ffffff",
               boxShadow: "6px 6px 20px rgb(54, 54, 54)",
               borderRadius: "8px",
