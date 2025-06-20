@@ -1,130 +1,114 @@
-import {Box, Typography, Card } from "@mui/material";
+import { Box, Typography, Card, useTheme } from "@mui/material";
 import ImportContactsIcon from "@mui/icons-material/ImportContacts";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import SchoolIcon from "@mui/icons-material/School";
 import PeopleIcon from "@mui/icons-material/People";
 
 function CardGroup() {
+  const theme = useTheme();
   const student = localStorage.getItem("student");
   const studentData = student ? JSON.parse(student) : null;
-  console.log(studentData);
-    const styles={
-        cardGroup: {
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "20px",
-              marginTop: "20px",
-              justifyContent: "space-between",
-            },
-            card: {
-              flex: "1 1 200px",
-              minWidth: "250px",
-              backgroundColor: "#ffffff",
-              boxShadow: "6px 6px 20px rgb(54, 54, 54)",
-              borderRadius: "8px",
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "30px",
-            },
-    }
+
+  const cards = [
+    {
+      icon: <ImportContactsIcon />,
+      label: "Enrolled Semester",
+      value: studentData?.session || "N/A",
+      color: theme.palette.primary.main,
+      bgColor: theme.palette.primary.light
+    },
+    {
+      icon: <CreditCardIcon />,
+      label: "Outstanding Fees",
+      value: "0",
+      color: theme.palette.success.main,
+      bgColor: theme.palette.success.light
+    },
+    {
+      icon: <SchoolIcon />,
+      label: "CGPA",
+      value: "3.00",
+      color: theme.palette.warning.main,
+      bgColor: theme.palette.warning.light
+    },
+    {
+      icon: <PeopleIcon />,
+      label: "Class Section",
+      value: "D",
+      color: theme.palette.info.main,
+      bgColor: theme.palette.info.light
+    },
+  ];
+
   return (
-    <Box sx={styles.cardGroup}>
-      <Card sx={styles.card} variant="outlined">
-        <Box>
-          <ImportContactsIcon sx={{ color: "#DC3545", fontSize: "50px" }} />
-        </Box>
-        <Box>
-          <Typography
-            variant="h5"
-            fontSize={28}
-            fontWeight={500}
-            color="initial"
-            sx={{ color: "#7e7e7e" }}
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "repeat(2, 1fr)",
+          md: "repeat(4, 1fr)"
+        },
+        gap: 3,
+      }}
+    >
+      {cards.map((card, index) => (
+        <Card
+          key={index}
+          sx={{
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            borderRadius: 2,
+            backgroundColor: card.bgColor,
+            boxShadow: theme.shadows[2],
+            transition: "all 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-5px)",
+              boxShadow: theme.shadows[4]
+            }
+          }}
+        >
+          <Box
+            sx={{
+              width: 60,
+              height: 60,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: "50%",
+              mb: 2,
+              boxShadow: 1
+            }}
           >
-            Enrolled Semester
-          </Typography>
-          <Typography
-            align="right"
-            variant="h6"
-            color="textSecondary"
-            sx={{ opacity: 0.5 }}
+            <Box sx={{ color: card.color }}>{card.icon}</Box>
+          </Box>
+          
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              mb: 1
+            }}
           >
-            {studentData ? studentData.session : "N/A"}
+            {card.label}
           </Typography>
-        </Box>
-      </Card>
-      <Card sx={styles.card} variant="outlined">
-        <Box>
-          <CreditCardIcon sx={{ color: "#198754", fontSize: "50px" }} />
-        </Box>
-        <Box>
-          <Typography
-            variant="h5"
-            fontSize={28}
-            fontWeight={500}
-            color="initial"
-            sx={{ color: "#7e7e7e" }}
+          
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              fontWeight: 700,
+              color: card.color
+            }}
           >
-            Outstanding Fees
+            {card.value}
           </Typography>
-          <Typography
-            align="right"
-            variant="h6"
-            color="textSecondary"
-            sx={{ opacity: 0.5 }}
-          >
-            0
-          </Typography>
-        </Box>
-      </Card>
-      <Card sx={styles.card} variant="outlined">
-        <Box>
-          <SchoolIcon sx={{ color: "#888", fontSize: "50px" }} />
-        </Box>
-        <Box>
-          <Typography
-            variant="h5"
-            fontSize={28}
-            fontWeight={500}
-            color="initial"
-            sx={{ color: "#7e7e7e" }}
-          >
-            CGPA
-          </Typography>
-          <Typography
-            align="right"
-            variant="h6"
-            color="textSecondary"
-            sx={{ opacity: 0.5 }}
-          >
-            3.00
-          </Typography>
-        </Box>
-      </Card>
-      <Card sx={styles.card} variant="outlined">
-        <Box>
-          <PeopleIcon sx={{ fontSize: "50px" }} />
-        </Box>
-        <Box>
-          <Typography
-            variant="h5"
-            fontSize={28}
-            fontWeight={500}
-            color="initial"
-            sx={{ color: "#7e7e7e" }}
-          >
-            Class Section
-          </Typography>
-          <Typography
-            align="right"
-            variant="h6"
-            color="textSecondary"
-            sx={{ opacity: 0.5 }}
-          >
-            D
-          </Typography>
-        </Box>
-      </Card>
+        </Card>
+      ))}
     </Box>
   );
 }

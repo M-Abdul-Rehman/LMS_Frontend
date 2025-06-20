@@ -1,143 +1,279 @@
-import {
-  AppBar,
-  Box,
-  Button,
-  CircularProgress,
-  Select,
-  Typography,
-  MenuItem, TableContainer, Paper, Table, TableHead, TableRow, TableBody, TableCell,
+import { 
+  AppBar, 
+  Box, 
+  Button, 
+  CircularProgress, 
+  Select, 
+  Typography, 
+  MenuItem, 
+  TableContainer, 
+  Paper, 
+  Table, 
+  TableHead, 
+  TableRow, 
+  TableBody, 
+  TableCell,
+  useTheme,
+  styled,
+  SelectChangeEvent
 } from "@mui/material";
 import NavDrawer from "../Components/NavDrawer";
-import CardGroup from "../Components/CardGroup";
-import DataTables from "../Components/DataTables";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 
+const DashboardWrapper = styled(Box)(({ theme }) => ({
+  display: "flex",
+  minHeight: "100vh",
+  backgroundColor: theme.palette.grey[50],
+}));
+
+const MainContent = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  transition: theme.transitions.create('margin', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+}));
+
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  boxShadow: theme.shadows[1],
+  padding: theme.spacing(2),
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+}));
+
+const DashboardContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  marginTop: theme.spacing(8),
+}));
+
 function Result() {
+  const theme = useTheme();
   const [isLoading, setIsLoading] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+  const [academicYear, setAcademicYear] = useState('Fa2021');
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
+    const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 
-  const styles = {
-    wrapper: {
-      display: "flex",
-      width: "100%",
-      height: "100vh",
-      backgroundColor: "#f0f0f0",
-    },
-    appbar: {
-      backgroundColor: "#ffffff",
-      display: "flex",
-      alignItems: "start",
-      boxShadow: "none",
-      padding: "16px",
-      width: "calc(100% - 90px)",
-      zIndex: 120,
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
-    dashboard: {
-      flexGrow: 1,
-      padding: "20px",
-      marginTop: "60px",
-      marginLeft: "90px",
-    },
-    loaderContainer: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "100vh",
-      width: "100vw",
-    },
+  const handleLogout = () => {
+    localStorage.removeItem("student");
+    localStorage.removeItem("token");
+    navigate("/");
   };
+
+  const handleYearChange = (event: SelectChangeEvent<string>) => {
+    setAcademicYear(event.target.value);
+  };
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const courses = [
+    { 
+      id: 1, 
+      name: "Computer Science 101", 
+      code: "CS123", 
+      teacher: "Ali Ahmed", 
+      grade: "B+" 
+    },
+    { 
+      id: 2, 
+      name: "Data Structures", 
+      code: "CS201", 
+      teacher: "Sarah Khan", 
+      grade: "A-" 
+    },
+    { 
+      id: 3, 
+      name: "Algorithms", 
+      code: "CS301", 
+      teacher: "Ahmed Raza", 
+      grade: "A" 
+    }
+  ];
 
   if (isLoading) {
     return (
-      <Box sx={styles.loaderContainer}>
-        <CircularProgress />
+      <Box sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: theme.palette.background.default
+      }}>
+        <CircularProgress size={60} thickness={4} />
       </Box>
     );
   }
 
   return (
-    <Box sx={styles.wrapper}>
-      <NavDrawer />
-      <AppBar sx={styles.appbar}>
-        <Typography variant="h5" color="initial" sx={{ opacity: 0.8 }}>
-          Learning Management System
-        </Typography>
-        <Button
-          onClick={() => {
-            localStorage.removeItem("student");
-            localStorage.removeItem("token");
-            navigate("/");
-          }}
-        >
-          Logout
-        </Button>
-      </AppBar>
-      <Box sx={styles.dashboard}>
-        <Typography variant="h4" color="initial">
-          Result:
-        </Typography>
-        <Select
-          defaultValue="Select Year"
-          sx={{
-            width: "100%",
-            margin: "20px auto",
-            backgroundColor: "#fff",
-            color: "#000",
-          }}
-        >
-          <MenuItem key={"Fa2021"} value={"Fa2021"}>
-            Fa2021
-          </MenuItem>
-        </Select>
-        <Box sx={{ display: "flex", marginLeft: "20px" }}>
-          <Typography variant="body1" sx={{ fontSize: "20px" }} color="red">
-            Note:
+    <DashboardWrapper>
+      <NavDrawer open={drawerOpen} onToggle={handleDrawerToggle} />
+      <MainContent sx={{ 
+        marginLeft: drawerOpen ? '240px' : '56px',
+        transition: theme.transitions.create('margin', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+      }}>
+        <StyledAppBar position="fixed" sx={{
+          width: drawerOpen ? 'calc(100% - 240px)' : 'calc(100% - 56px)',
+          marginLeft: drawerOpen ? '240px' : '56px',
+        }}>
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              Learning Management System
+            </Typography>
+            <Button 
+              variant="outlined" 
+              color="primary"
+              onClick={handleLogout}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2,
+                px: 3,
+                py: 1
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
+        </StyledAppBar>
+        
+        <DashboardContainer>
+          <Typography variant="h4" gutterBottom sx={{ 
+            fontWeight: 600,
+            mb: 4,
+            color: theme.palette.text.primary
+          }}>
+            Result
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: "20px" }} color="initial">
-            CGPA means Cumulative Grade Point Average and is the measuring grade
-            for your overall performance during an academic year. SGPA is
-            Semester Grade Point Average that adds all the CGPAs after an
-            educational program.
-          </Typography>
-        </Box>
-        <Box marginTop={4} sx={{ display: "flex",alignItems: "center", justifyContent: "center",gap: "20px" }}>
-            <Typography variant="h4" textAlign={"center"} fontWeight={600} color="initial">Semester GPA:</Typography>
-            <Typography variant="h4" textAlign={"center"} fontWeight={600} color="red">3.00</Typography>
-        </Box>
-        <Box sx={{ marginTop: "20px" }}>
-            <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
-              <Table aria-label="simple table">
-                <TableHead sx={{ backgroundColor: "#f5f5f5" ,opacity: 0.8}}>
-                  <TableRow>
-                    <TableCell align="center">ID</TableCell>
-                    <TableCell align="center">Course Name</TableCell>
-                    <TableCell align="center">Course Code</TableCell>
-                    <TableCell align="center">Course Teacher</TableCell>
-                    <TableCell align="center">Course Grade</TableCell>
+
+          <Select
+            value={academicYear}
+            onChange={handleYearChange}
+            sx={{
+              width: '100%',
+              mb: 4,
+              backgroundColor: theme.palette.background.paper,
+              '& .MuiSelect-select': {
+                py: 1.5
+              }
+            }}
+          >
+            <MenuItem value="Fa2021">Fall 2021</MenuItem>
+            <MenuItem value="Sp2022">Spring 2022</MenuItem>
+            <MenuItem value="Fa2022">Fall 2022</MenuItem>
+          </Select>
+
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            mb: 3,
+            p: 2,
+            backgroundColor: theme.palette.warning.light,
+            borderRadius: 1
+          }}>
+            <Typography variant="body1" sx={{ 
+              fontWeight: 600,
+              mr: 1,
+              color: theme.palette.warning.dark
+            }}>
+              Note:
+            </Typography>
+            <Typography variant="body1" sx={{ color: theme.palette.text.secondary }}>
+              CGPA means Cumulative Grade Point Average and is the measuring grade
+              for your overall performance during an academic year. SGPA is
+              Semester Grade Point Average that adds all the CGPAs after an
+              educational program.
+            </Typography>
+          </Box>
+
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            mb: 4,
+            p: 2,
+            backgroundColor: theme.palette.primary.light,
+            borderRadius: 1
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: 600,color: theme.palette.primary.contrastText }}>
+              Semester GPA:
+            </Typography>
+            <Typography variant="h5" sx={{ 
+              fontWeight: 700,
+              color: theme.palette.primary.contrastText,
+            }}>
+              3.00
+            </Typography>
+          </Box>
+
+          <TableContainer component={Paper} sx={{ 
+            boxShadow: theme.shadows[2],
+            borderRadius: 2,
+            overflow: 'hidden'
+          }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow sx={{ 
+                  backgroundColor: theme.palette.grey[200],
+                  '& th': {
+                    fontWeight: 600,
+                    py: 2
+                  }
+                }}>
+                  <TableCell align="center">ID</TableCell>
+                  <TableCell align="center">Course Name</TableCell>
+                  <TableCell align="center">Course Code</TableCell>
+                  <TableCell align="center">Course Teacher</TableCell>
+                  <TableCell align="center">Course Grade</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {courses.map((course) => (
+                  <TableRow 
+                    key={course.id}
+                    hover
+                    sx={{ '&:last-child td': { borderBottom: 0 } }}
+                  >
+                    <TableCell align="center">{course.id}</TableCell>
+                    <TableCell align="center">{course.name}</TableCell>
+                    <TableCell align="center">{course.code}</TableCell>
+                    <TableCell align="center">{course.teacher}</TableCell>
+                    <TableCell align="center" sx={{ 
+                      fontWeight: 600,
+                      color: course.grade === 'A' ? theme.palette.success.main : 
+                             course.grade === 'B+' ? theme.palette.warning.main : 
+                             theme.palette.text.primary
+                    }}>
+                      {course.grade}
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell component="th" align="center" scope="row">1</TableCell>
-                    <TableCell component="th" align="center" scope="row">Computer Science 101</TableCell>
-                    <TableCell component="th" align="center" scope="row">CS123</TableCell>
-                    <TableCell component="th" align="center" scope="row">Ali Ahmed</TableCell>
-                    <TableCell component="th" align="center" scope="row">B+</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-        </Box>
-      </Box>
-    </Box>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </DashboardContainer>
+      </MainContent>
+    </DashboardWrapper>
   );
 }
 

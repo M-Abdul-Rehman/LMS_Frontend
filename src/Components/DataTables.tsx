@@ -1,123 +1,145 @@
-import { Box, Typography } from "@mui/material";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import { Box, Typography, useTheme } from "@mui/material";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper 
+} from "@mui/material";
 
 function DataTables() {
+  const theme = useTheme();
+
+  const academicCalendar = [
+    { activity: "Enrollment Start", date: "10 March 2024" },
+    { activity: "Semester Start", date: "11 March 2024" },
+    { activity: "Enrollment End", date: "19 March 2024" },
+    { activity: "Semester Freeze", date: "20 March 2024" }
+  ];
+
+  const currentCourses = [
+    { 
+      course: "Computer Science 101", 
+      teacher: "Sir Ali Ahmed", 
+      type: "Theory", 
+      present: 10, 
+      absent: 1, 
+      percentage: "90%" 
+    },
+    { 
+      course: "Mathematics", 
+      teacher: "Dr. Sarah Khan", 
+      type: "Theory", 
+      present: 8, 
+      absent: 2, 
+      percentage: "80%" 
+    },
+    { 
+      course: "Software Lab", 
+      teacher: "Prof. Ahmed Raza", 
+      type: "Practical", 
+      present: 12, 
+      absent: 0, 
+      percentage: "100%" 
+    }
+  ];
+
   return (
-    <Box sx={{ display: "flex", margin: "50px 10%", gap: "10%" }}>
-      <Box sx={{ width: "40%", height: "250px" }}>
+    <Box sx={{ 
+      display: "flex", 
+      flexDirection: { xs: "column", md: "row" },
+      gap: 4,
+      mt: 4
+    }}>
+      {/* Academic Calendar Table */}
+      <Box sx={{ 
+        flex: 1,
+        boxShadow: theme.shadows[2],
+        borderRadius: 2,
+        overflow: "hidden"
+      }}>
         <Typography
           sx={{
-            backgroundColor: "#406A90",
-            width: "100%",
-            padding: "5px 15px",
-            color: "white",
+            backgroundColor: theme.palette.primary.main,
+            p: 2,
+            color: theme.palette.primary.contrastText,
+            fontWeight: 600,
+            fontSize: { xs: "1rem", sm: "1.1rem" }
           }}
-          variant="h6"
         >
-          Academic Calander
+          Academic Calendar
         </Typography>
-        <TableContainer
-          component={Paper}
-          sx={{ minWidth: "100%", padding: "5px 15px", height: "100%" }}
-        >
-          <Table size="small" aria-label="a dense table">
+        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+          <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>Activity</TableCell>
-                <TableCell>Date</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Activity</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody sx={{ opacity: 0.8 }}>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Enrollment Start
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  10 March 2024
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Semester Start
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  11 March 2024
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Enrollment End
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  19 March 2024
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Semester Freeze
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  20 March 2024
-                </TableCell>
-              </TableRow>
+            <TableBody>
+              {academicCalendar.map((item, index) => (
+                <TableRow 
+                  key={index} 
+                  hover
+                  sx={{ '&:last-child td': { borderBottom: 0 } }}
+                >
+                  <TableCell>{item.activity}</TableCell>
+                  <TableCell>{item.date}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Box>
-      <Box sx={{ width: "40%", height: "250px" }}>
+
+      {/* Current Courses Table */}
+      <Box sx={{ 
+        flex: 1,
+        boxShadow: theme.shadows[2],
+        borderRadius: 2,
+        overflow: "hidden"
+      }}>
         <Typography
           sx={{
-            backgroundColor: "#8390F9",
-            width: "100%",
-            padding: "5px 15px",
-            color: "white",
+            backgroundColor: theme.palette.secondary.main,
+            p: 2,
+            color: theme.palette.secondary.contrastText,
+            fontWeight: 600,
+            fontSize: { xs: "1rem", sm: "1.1rem" }
           }}
-          variant="h6"
         >
-          Current Course Enrolled
+          Current Courses
         </Typography>
-        <TableContainer
-          component={Paper}
-          sx={{ minWidth: "100%", padding: "5px 15px", height: "100%" }}
-        >
-          <Table size="small" aria-label="a dense table">
-            <TableHead sx={{ opacity: 0.7 }}>
+        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell>Course Name</TableCell>
-                <TableCell>Teacher Name</TableCell>
-                <TableCell>T/L</TableCell>
-                <TableCell>P</TableCell>
-                <TableCell>A</TableCell>
-                <TableCell>%</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Course</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Teacher</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Present</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Absent</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>%</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Computer Science 101
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  Sir Ali Ahmed
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  Theory
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  10
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  9
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  90%
-                </TableCell>
-              </TableRow>
+              {currentCourses.map((course, index) => (
+                <TableRow 
+                  key={index} 
+                  hover
+                  sx={{ '&:last-child td': { borderBottom: 0 } }}
+                >
+                  <TableCell>{course.course}</TableCell>
+                  <TableCell>{course.teacher}</TableCell>
+                  <TableCell>{course.type}</TableCell>
+                  <TableCell>{course.present}</TableCell>
+                  <TableCell>{course.absent}</TableCell>
+                  <TableCell>{course.percentage}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
