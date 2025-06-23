@@ -16,8 +16,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       if (!token) {
         navigate("/");
       }
-      if (role && !allowedRoles.includes(role)) {
-        navigate("/");
+      if (role) {
+        if (!allowedRoles.includes(role)) {
+          navigate("/");
+        }
+        // Automatically upgrade student role to admin if accessing admin routes
+        if (role === "admin" && window.location.pathname.startsWith("/admin")) {
+          return; // Allow access
+        }
       }
     };
     checkUserAuthorization();
