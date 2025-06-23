@@ -70,9 +70,9 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle }) => {
       iconColor: theme.palette.secondary.main,
     },
     {
-      text: "Courses",
+      text: "Classes",
       icon: <SchoolIcon />,
-      path: "/admin/courses",
+      path: "/admin/classes",
       iconColor: theme.palette.success.main,
     },
     {

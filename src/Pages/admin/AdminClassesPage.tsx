@@ -1,3 +1,4 @@
+// src/pages/admin/AdminClassesPage.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -23,7 +24,7 @@ import {
   Alert,
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
-import { fetchAllStudents, deleteStudent, updateStudent, registerStudent, StudentData } from '../../api/studentApi';
+import { fetchAllClasses, deleteClass, updateClass, registerClass, ClassData } from '../../api/classApi';
 import AdminNavDrawer from '../../Components/AdminNavDrawer';
 
 // Styled components
@@ -48,55 +49,48 @@ const ContentArea = styled(Box)(({ theme }) => ({
   overflowY: "auto",
 }));
 
-// Form data type with all required fields
-interface StudentFormData {
-  firstName: string;
-  lastName: string;
+interface ClassFormData {
+  title: string;
+  code: string;
+  semester: string;
   session: string;
   department: string;
-  rollNumber: string;
-  email: string;
-  password: string;
+  instructorId: string;
 }
 
-const AdminStudentsPage: React.FC = () => {
+const AdminClassesPage: React.FC = () => {
   const theme = useTheme();
-  const [students, setStudents] = useState<StudentData[]>([]);
+  const [classes, setClasses] = useState<ClassData[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [currentStudent, setCurrentStudent] = useState<StudentData | null>(null);
-  const [formData, setFormData] = useState<StudentFormData>({
-    firstName: '',
-    lastName: '',
+  const [currentClass, setCurrentClass] = useState<ClassData | null>(null);
+  const [formData, setFormData] = useState<ClassFormData>({
+    title: '',
+    code: '',
+    semester: '',
     session: '',
     department: '',
-    rollNumber: '',
-    email: '',
-    password: '',
+    instructorId: '',
   });
   const [error, setError] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Fetch all students
+  // Fetch all classes
   useEffect(() => {
-    const abortController = new AbortController();
-    const loadStudents = async () => {
+    const loadClasses = async () => {
       try {
-        const data = await fetchAllStudents();
-        setStudents(Array.isArray(data) ? data : []);
+        const data = await fetchAllClasses();
+        setClasses(Array.isArray(data) ? data : []);
       } catch (error) {
-        if (error instanceof Error && error.name !== 'AbortError') {
-          console.error('Failed to fetch students:', error);
-          setError('Failed to load students');
-          setStudents([]);
-        }
+        console.error('Failed to fetch classes:', error);
+        setError('Failed to load classes');
+        setClasses([]);
       } finally {
         setLoading(false);
       }
     };
-    loadStudents();
-    return () => abortController.abort();
+    loadClasses();
   }, []);
 
   // Form handlers
@@ -105,25 +99,16 @@ const AdminStudentsPage: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    const requiredFields: Array<{name: keyof StudentFormData, label: string}> = [
-      {name: 'firstName', label: 'First Name'},
-      {name: 'lastName', label: 'Last Name'},
-      {name: 'session', label: 'Session'},
-      {name: 'department', label: 'Department'},
-      {name: 'rollNumber', label: 'Roll Number'},
-      {name: 'email', label: 'Email'}
+    const requiredFields: Array<keyof ClassFormData> = [
+      'title', 'code', 'semester', 
+      'session', 'department'
     ];
 
     for (const field of requiredFields) {
-      if (!formData[field.name].trim()) {
-        setError(`${field.label} is required`);
+      if (!formData[field].trim()) {
+        setError(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
         return false;
       }
-    }
-
-    if (!currentStudent && !formData.password.trim()) {
-      setError('Password is required for new students');
-      return false;
     }
 
     return true;
@@ -135,37 +120,35 @@ const AdminStudentsPage: React.FC = () => {
   const handleDeleteModalClose = () => setDeleteModalOpen(false);
 
   const handleAddClick = () => {
-    setCurrentStudent(null);
+    setCurrentClass(null);
     setFormData({
-      firstName: '',
-      lastName: '',
+      title: '',
+      code: '',
+      semester: '',
       session: '',
       department: '',
-      rollNumber: '',
-      email: '',
-      password: '',
+      instructorId: '',
     });
     setModalOpen(true);
     setError('');
   };
 
-  const handleEditClick = (student: StudentData) => {
-    setCurrentStudent(student);
+  const handleEditClick = (cls: ClassData) => {
+    setCurrentClass(cls);
     setFormData({
-      firstName: student.firstName ?? '',
-      lastName: student.lastName ?? '',
-      session: student.session ?? '',
-      department: student.department ?? '',
-      rollNumber: student.rollNumber ?? '',
-      email: student.email ?? '',
-      password: '',
+      title: cls.title,
+      code: cls.code,
+      semester: cls.semester,
+      session: cls.session,
+      department: cls.department,
+      instructorId: cls.instructorId || '',
     });
     setModalOpen(true);
     setError('');
   };
 
-  const handleDeleteClick = (student: StudentData) => {
-    setCurrentStudent(student);
+  const handleDeleteClick = (cls: ClassData) => {
+    setCurrentClass(cls);
     setDeleteModalOpen(true);
   };
 
@@ -174,41 +157,14 @@ const AdminStudentsPage: React.FC = () => {
 
     try {
       setError('');
-      if (currentStudent) {
-        // For updates, only include password if it was changed
-        const updateData = formData.password.trim() 
-          ? formData 
-          : {
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              session: formData.session,
-              department: formData.department,
-              rollNumber: formData.rollNumber,
-              email: formData.email
-            };
-        
-        const updatedStudent = await updateStudent(currentStudent.studentId!, updateData);
-        setStudents(students.map(s => 
-          s.studentId === currentStudent.studentId ? updatedStudent : s
+      if (currentClass) {
+        const updatedClass = await updateClass(currentClass.id, formData);
+        setClasses(classes.map(c => 
+          c.id === currentClass.id ? updatedClass : c
         ));
       } else {
-        // For new students, all fields are required
-        if (!formData.session || !formData.department || !formData.rollNumber) {
-          throw new Error('Missing required fields for student ID generation');
-        }
-        const studId = `${formData.session}-${formData.department}-${formData.rollNumber}`;
-        const newStudent: StudentData = {
-          studentId: studId.replace(/\s+/g, '-'),
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          session: formData.session,
-          department: formData.department,
-          rollNumber: formData.rollNumber,
-          email: formData.email,
-          password: formData.password,
-        };
-        const createdStudent = await registerStudent(newStudent);
-        setStudents([...students, createdStudent]);
+        const createdClass = await registerClass(formData);
+        setClasses([...classes, createdClass]);
       }
       setModalOpen(false);
     } catch (err: any) {
@@ -217,13 +173,13 @@ const AdminStudentsPage: React.FC = () => {
   };
 
   const confirmDelete = async () => {
-    if (!currentStudent?.studentId) return;
+    if (!currentClass?.id) return;
     try {
-      await deleteStudent(currentStudent.studentId);
-      setStudents(students.filter(s => s.studentId !== currentStudent.studentId));
+      await deleteClass(currentClass.id);
+      setClasses(classes.filter(c => c.id !== currentClass.id));
     } catch (error) {
-      console.error('Failed to delete student:', error);
-      setError('Failed to delete student');
+      console.error('Failed to delete class:', error);
+      setError('Failed to delete class');
     } finally {
       setDeleteModalOpen(false);
     }
@@ -257,7 +213,7 @@ const AdminStudentsPage: React.FC = () => {
         <ContentArea>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
             <Typography variant="h4" sx={{ fontWeight: 600 }}>
-              Student Management
+              Class Management
             </Typography>
             <Button 
               variant="contained" 
@@ -265,7 +221,7 @@ const AdminStudentsPage: React.FC = () => {
               onClick={handleAddClick}
               sx={{ minWidth: '180px' }}
             >
-              Add New Student
+              Add New Class
             </Button>
           </Stack>
 
@@ -279,36 +235,36 @@ const AdminStudentsPage: React.FC = () => {
             <Table>
               <TableHead sx={{ backgroundColor: theme.palette.grey[100] }}>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Title</TableCell>
                   <TableCell>Department</TableCell>
                   <TableCell>Session</TableCell>
-                  <TableCell>Roll Number</TableCell>
+                  <TableCell>Semester</TableCell>
+                  <TableCell>Instructor ID</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {students.length > 0 ? (
-                  students.map((student) => (
-                    <TableRow key={student.studentId}>
-                      <TableCell>{student.studentId || 'N/A'}</TableCell>
-                      <TableCell>{student.firstName ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}</TableCell>
-                      <TableCell>{student.email || 'No email provided'}</TableCell>
-                      <TableCell>{student.department}</TableCell>
-                      <TableCell>{student.session}</TableCell>
-                      <TableCell>{student.rollNumber}</TableCell>
+                {classes.length > 0 ? (
+                  classes.map((cls) => (
+                    <TableRow key={cls.id}>
+                      <TableCell>{cls.code}</TableCell>
+                      <TableCell>{cls.title}</TableCell>
+                      <TableCell>{cls.department}</TableCell>
+                      <TableCell>{cls.session}</TableCell>
+                      <TableCell>{cls.semester}</TableCell>
+                      <TableCell>{cls.instructorId || '-'}</TableCell>
                       <TableCell>
                         <IconButton 
                           color="primary" 
-                          onClick={() => handleEditClick(student)}
+                          onClick={() => handleEditClick(cls)}
                           aria-label="edit"
                         >
                           <Edit />
                         </IconButton>
                         <IconButton 
                           color="error" 
-                          onClick={() => handleDeleteClick(student)}
+                          onClick={() => handleDeleteClick(cls)}
                           aria-label="delete"
                         >
                           <Delete />
@@ -319,7 +275,7 @@ const AdminStudentsPage: React.FC = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={7} align="center">
-                      No students found
+                      No classes found
                     </TableCell>
                   </TableRow>
                 )}
@@ -327,7 +283,7 @@ const AdminStudentsPage: React.FC = () => {
             </Table>
           </TableContainer>
 
-          {/* Student Form Modal */}
+          {/* Class Form Modal */}
           <Dialog 
             open={modalOpen} 
             onClose={handleModalClose}
@@ -335,38 +291,28 @@ const AdminStudentsPage: React.FC = () => {
             fullWidth
           >
             <DialogTitle>
-              {currentStudent ? 'Edit Student' : 'Add New Student'}
+              {currentClass ? 'Edit Class' : 'Add New Class'}
             </DialogTitle>
             <DialogContent>
               {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
               
               <TextField
                 margin="dense"
-                label="First Name"
-                name="firstName"
+                label="Title"
+                name="title"
                 fullWidth
                 required
-                value={formData.firstName}
+                value={formData.title}
                 onChange={handleFormChange}
                 sx={{ mb: 2 }}
               />
               <TextField
                 margin="dense"
-                label="Last Name"
-                name="lastName"
+                label="Code"
+                name="code"
                 fullWidth
                 required
-                value={formData.lastName}
-                onChange={handleFormChange}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                margin="dense"
-                label="Session"
-                name="session"
-                fullWidth
-                required
-                value={formData.session}
+                value={formData.code}
                 onChange={handleFormChange}
                 sx={{ mb: 2 }}
               />
@@ -382,35 +328,31 @@ const AdminStudentsPage: React.FC = () => {
               />
               <TextField
                 margin="dense"
-                label="Roll Number"
-                name="rollNumber"
+                label="Session"
+                name="session"
                 fullWidth
                 required
-                value={formData.rollNumber}
+                value={formData.session}
                 onChange={handleFormChange}
                 sx={{ mb: 2 }}
               />
               <TextField
                 margin="dense"
-                label="Email"
-                name="email"
-                type="email"
+                label="Semester"
+                name="semester"
                 fullWidth
                 required
-                value={formData.email}
+                value={formData.semester}
                 onChange={handleFormChange}
                 sx={{ mb: 2 }}
               />
               <TextField
                 margin="dense"
-                label="Password"
-                name="password"
-                type="password"
+                label="Instructor ID"
+                name="instructorId"
                 fullWidth
-                required={!currentStudent}
-                value={formData.password}
+                value={formData.instructorId}
                 onChange={handleFormChange}
-                helperText={currentStudent ? "Leave blank to keep current password" : undefined}
               />
             </DialogContent>
             <DialogActions>
@@ -420,7 +362,7 @@ const AdminStudentsPage: React.FC = () => {
                 variant="contained" 
                 color="primary"
               >
-                {currentStudent ? 'Update' : 'Add'}
+                {currentClass ? 'Update' : 'Add'}
               </Button>
             </DialogActions>
           </Dialog>
@@ -433,7 +375,7 @@ const AdminStudentsPage: React.FC = () => {
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete {currentStudent?.firstName} {currentStudent?.lastName}?
+                Are you sure you want to delete {currentClass?.title} ({currentClass?.code})?
                 <br />
                 <strong>This action cannot be undone.</strong>
               </Typography>
@@ -456,4 +398,4 @@ const AdminStudentsPage: React.FC = () => {
   );
 };
 
-export default AdminStudentsPage;
+export default AdminClassesPage;

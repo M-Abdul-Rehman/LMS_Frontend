@@ -18,7 +18,7 @@ import { useNavigate } from "react-router";
 const sessions = ["Fa2020", "Fa2021", "Fa2022", "Fa2023"];
 const departments = ["CS", "EE", "ME", "CE"];
 
-function Login() {
+const Login : React.FC = () => {
   const [session, setSession] = useState("");
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");

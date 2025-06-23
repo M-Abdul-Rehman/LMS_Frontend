@@ -1,12 +1,10 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import Login from "./Pages/Login";
-import RegisterStudent from "./Pages/admin/RegisterStudents";
-import Home from "./Pages/Home";
 import ProtectedRoute from "./Components/ProtectedRoutes";
-import Result from "./Pages/Result";
-import Enrollment from "./Pages/Enrollment";
 import AdminDashboard from "./Pages/admin/AdminDashboard";
 import AdminStudentsPage from "./Pages/admin/AdminStudentsPage";
+import AdminClassesPage from "./Pages/admin/AdminClassesPage";
+import MainPage from "./Pages/MainPage";
 
 function App() {
   return (
@@ -18,23 +16,7 @@ function App() {
             path="/home"
             element={
               <ProtectedRoute allowedRoles={["student"]}>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/exam/result"
-            element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <Result />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/enrollment"
-            element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <Enrollment />
+                <MainPage />
               </ProtectedRoute>
             }
           />
@@ -54,13 +36,13 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route 
-            path="/admin/register/student" 
+          <Route
+            path="/admin/classes"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <RegisterStudent />
+                <AdminClassesPage />
               </ProtectedRoute>
-            } 
+            }
           />
         </Routes>
       </BrowserRouter>
