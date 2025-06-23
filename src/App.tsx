@@ -6,6 +6,7 @@ import ProtectedRoute from "./Components/ProtectedRoutes";
 import Result from "./Pages/Result";
 import Enrollment from "./Pages/Enrollment";
 import AdminDashboard from "./Pages/admin/AdminDashboard";
+import AdminStudentsPage from "./Pages/admin/AdminStudentsPage";
 
 function App() {
   return (
@@ -42,6 +43,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/students"
+            element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <AdminStudentsPage />
               </ProtectedRoute>
             }
           />
