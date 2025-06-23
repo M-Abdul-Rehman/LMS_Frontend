@@ -83,10 +83,10 @@ const AdminStudentsPage: React.FC = () => {
     const abortController = new AbortController();
     const loadStudents = async () => {
       try {
-        const data = await fetchAllStudents(abortController.signal);
+        const data = await fetchAllStudents();
         setStudents(Array.isArray(data) ? data : []);
       } catch (error) {
-        if (error.name !== 'AbortError') {
+        if (error instanceof Error && error.name !== 'AbortError') {
           console.error('Failed to fetch students:', error);
           setError('Failed to load students');
           setStudents([]);
@@ -152,12 +152,12 @@ const AdminStudentsPage: React.FC = () => {
   const handleEditClick = (student: StudentData) => {
     setCurrentStudent(student);
     setFormData({
-      firstName: student.firstName,
-      lastName: student.lastName,
-      session: student.session,
-      department: student.department,
-      rollNumber: student.rollNumber,
-      email: student.email,
+      firstName: student.firstName ?? '',
+      lastName: student.lastName ?? '',
+      session: student.session ?? '',
+      department: student.department ?? '',
+      rollNumber: student.rollNumber ?? '',
+      email: student.email ?? '',
       password: '',
     });
     setModalOpen(true);
@@ -187,7 +187,7 @@ const AdminStudentsPage: React.FC = () => {
               email: formData.email
             };
         
-        const updatedStudent = await updateStudent(currentStudent.studentId, updateData);
+        const updatedStudent = await updateStudent(currentStudent.studentId!, updateData);
         setStudents(students.map(s => 
           s.studentId === currentStudent.studentId ? updatedStudent : s
         ));
