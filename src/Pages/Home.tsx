@@ -1,8 +1,7 @@
-import { AppBar, Box, Button, CircularProgress, Typography, useTheme, styled } from "@mui/material";
+import { Box, CircularProgress, useTheme, styled, Typography } from "@mui/material";
 import NavDrawer from "../Components/NavDrawer";
 import CardGroup from "../Components/CardGroup";
 import DataTables from "../Components/DataTables";
-import { useNavigate } from "react-router";
 import { useEffect, useState, useRef } from "react";
 
 const DashboardWrapper = styled(Box)({
@@ -16,7 +15,7 @@ const MainContent = styled(Box)({
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  minWidth: 0, // Prevent flexbox overflow
+  minWidth: 0,
 });
 
 const ContentArea = styled(Box)(({ theme }) => ({
@@ -30,7 +29,6 @@ function Home() {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,12 +38,6 @@ function Home() {
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("student");
-    localStorage.removeItem("token");
-    navigate("/");
   };
 
   if (isLoading) {
@@ -74,42 +66,6 @@ function Home() {
           duration: theme.transitions.duration.enteringScreen,
         }),
       }}>
-        <AppBar 
-          position="fixed"
-          sx={{
-            width: drawerOpen ? `calc(100% - 240px)` : `calc(100% - 56px)`,
-            ml: drawerOpen ? '240px' : '56px',
-            zIndex: theme.zIndex.drawer + 1,
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            boxShadow: theme.shadows[1],
-            p: 2,
-          }}
-        >
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Learning Management System
-            </Typography>
-            <Button 
-              variant="outlined" 
-              color="primary"
-              onClick={handleLogout}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 2,
-                px: 3,
-                py: 1
-              }}
-            >
-              Logout
-            </Button>
-          </Box>
-        </AppBar>
-        
         <ContentArea ref={contentRef}>
           <Typography variant="h4" gutterBottom sx={{ 
             fontWeight: 600,

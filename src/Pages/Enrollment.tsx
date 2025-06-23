@@ -1,5 +1,4 @@
-import { 
-  AppBar,
+import {
   Box, 
   Typography, 
   Paper, 
@@ -15,7 +14,6 @@ import {
   styled
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import NavDrawer from "../Components/NavDrawer";
 import { useEffect, useState } from "react";
 
@@ -62,7 +60,6 @@ const ContentArea = styled(Box)(({ theme }) => ({
 
 function Enrollment() {
   const theme = useTheme();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [studentInfo, setStudentInfo] = useState<StudentInfo | null>(null);
@@ -75,12 +72,6 @@ function Enrollment() {
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("student");
-    localStorage.removeItem("token");
-    navigate("/");
   };
 
   // Mock data initialization with proper types
@@ -132,43 +123,7 @@ function Enrollment() {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
         }),
-      }}>
-        <AppBar 
-          position="fixed"
-          sx={{
-            width: drawerOpen ? `calc(100% - 240px)` : `calc(100% - 56px)`,
-            ml: drawerOpen ? '240px' : '56px',
-            zIndex: theme.zIndex.drawer + 1,
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            boxShadow: theme.shadows[1],
-            p: 2,
-          }}
-        >
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Learning Management System
-            </Typography>
-            <Button 
-              variant="outlined" 
-              color="primary"
-              onClick={handleLogout}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 2,
-                px: 3,
-                py: 1
-              }}
-            >
-              Logout
-            </Button>
-          </Box>
-        </AppBar>
-        
+      }}>        
         <ContentArea>
           <Typography variant="h4" gutterBottom sx={{ 
             fontWeight: 600,

@@ -7,14 +7,19 @@ import {
   ListItemText,
   Toolbar,
   useTheme,
-  styled
+  styled,
+  AppBar,
+  Box,
+  Button,
+  Typography,
+  IconButton,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
   Close as CloseIcon,
   Home as HomeIcon,
   DataUsage as DataUsageIcon,
-  MilitaryTech as MilitaryTechIcon
+  MilitaryTech as MilitaryTechIcon,
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,14 +30,21 @@ interface NavDrawerProps {
 }
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
-  '& .MuiDrawer-paper': {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
+  "& .MuiDrawer-paper": {
+    overflowX: "hidden",
+    transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    whiteSpace: 'nowrap',
+    whiteSpace: "nowrap",
   },
+}));
+
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  boxShadow: theme.shadows[1],
+  zIndex: theme.zIndex.drawer + 1,
 }));
 
 function NavDrawer({ open, onToggle }: NavDrawerProps) {
@@ -41,29 +53,27 @@ function NavDrawer({ open, onToggle }: NavDrawerProps) {
   const location = useLocation();
   const [activePath, setActivePath] = useState(location.pathname);
 
-  // Update in NavDrawer.tsx
-const navItems = [
-  { 
-    text: "Home", 
-    icon: <HomeIcon />,
-    path: "/home",
-    iconColor: theme.palette.primary.main
-  },
-  { 
-    text: "Enrollment", 
-    icon: <DataUsageIcon />,
-    path: "/enrollment",
-    iconColor: theme.palette.secondary.main
-  },
-  { 
-    text: "Result", 
-    icon: <MilitaryTechIcon />,
-    path: "/exam/result",
-    iconColor: theme.palette.success.main
-  }
-];
+  const navItems = [
+    {
+      text: "Home",
+      icon: <HomeIcon />,
+      path: "/home",
+      iconColor: theme.palette.primary.main,
+    },
+    {
+      text: "Enrollment",
+      icon: <DataUsageIcon />,
+      path: "/enrollment",
+      iconColor: theme.palette.secondary.main,
+    },
+    {
+      text: "Result",
+      icon: <MilitaryTechIcon />,
+      path: "/exam/result",
+      iconColor: theme.palette.success.main,
+    },
+  ];
 
-  // Update active path when location changes
   useEffect(() => {
     setActivePath(location.pathname);
   }, [location]);
@@ -72,115 +82,129 @@ const navItems = [
     navigate(path);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("student");
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   return (
-    <StyledDrawer 
-      variant="permanent" 
-      open={open}
-      sx={{
-        width: open ? 240 : 56,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { 
+    <>
+      <StyledAppBar position="fixed">
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={onToggle}
+              edge="start"
+              sx={{ mr: 2 }}
+            >
+              {open ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              Learning Management System
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleLogout}
+            sx={{
+              textTransform: "none",
+              borderRadius: 2,
+              px: 3,
+              py: 1,
+            }}
+          >
+            Logout
+          </Button>
+        </Toolbar>
+      </StyledAppBar>
+
+      <StyledDrawer
+        variant="permanent"
+        open={open}
+        sx={{
           width: open ? 240 : 56,
-          boxSizing: 'border-box',
-          borderRight: 'none',
-          backgroundColor: theme.palette.background.default,
-          boxShadow: theme.shadows[3],
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        },
-      }}
-    >
-      <Toolbar 
-        sx={{ 
-          minHeight: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          px: 2
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            width: open ? 240 : 56,
+            boxSizing: "border-box",
+            borderRight: "none",
+            backgroundColor: theme.palette.background.default,
+            boxShadow: theme.shadows[3],
+            transition: theme.transitions.create("width", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          },
         }}
       >
-        {open ? (
-          <CloseIcon 
-            onClick={onToggle}
-            sx={{ 
-              cursor: 'pointer',
-              color: theme.palette.text.primary
-            }}
-          />
-        ) : (
-          <MenuIcon 
-            onClick={onToggle}
-            sx={{ 
-              cursor: 'pointer',
-              color: theme.palette.text.primary
-            }}
-          />
-        )}
-      </Toolbar>
-      
-      <List sx={{ px: 1 }}>
-        <ListItem disablePadding sx={{ mb: 2 }}>
-          <ListItemText 
-            primary="Student Portal" 
-            sx={{ 
-              opacity: open ? 1 : 0,
-              pl: 2,
-              fontWeight: 'bold',
-              color: theme.palette.text.primary
-            }} 
-          />
-        </ListItem>
-        
-        {navItems.map((item) => {
-          const isActive = activePath === item.path;
-          return (
-            <ListItem 
-              key={item.text} 
-              disablePadding
-              sx={{ 
-                mb: 0.5,
-                borderRadius: 1,
-                backgroundColor: isActive ? 
-                  theme.palette.action.selected : 'transparent'
-              }}
-            >
-              <ListItemButton
-                onClick={() => handleNavigation(item.path)}
+        <Toolbar />{" "}
+        {/* This empty Toolbar is for proper spacing below the AppBar */}
+        <List sx={{ px: 1 }}>
+          {navItems.map((item) => {
+            const isActive = activePath === item.path;
+            return (
+              <ListItem
+                key={item.text}
+                disablePadding
                 sx={{
-                  px: 2,
-                  py: 1.25,
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
+                  mb: 0.5,
+                  borderRadius: 1,
+                  backgroundColor: isActive
+                    ? theme.palette.action.selected
+                    : "transparent",
                 }}
               >
-                <ListItemIcon
+                <ListItemButton
+                  onClick={() => handleNavigation(item.path)}
                   sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : 'auto',
-                    justifyContent: 'center',
-                    color: isActive ? item.iconColor : theme.palette.text.secondary
+                    px: 2,
+                    py: 1.25,
+                    minHeight: 48,
+                    justifyContent: open ? "initial" : "center",
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.text} 
-                  sx={{ 
-                    opacity: open ? 1 : 0,
-                    '& span': {
-                      fontWeight: isActive ? '600' : '400',
-                      color: isActive ? theme.palette.text.primary : theme.palette.text.secondary
-                    }
-                  }} 
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
-    </StyledDrawer>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 2 : "auto",
+                      justifyContent: "center",
+                      color: isActive
+                        ? item.iconColor
+                        : theme.palette.text.secondary,
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.text}
+                    sx={{
+                      opacity: open ? 1 : 0,
+                      "& span": {
+                        fontWeight: isActive ? "600" : "400",
+                        color: isActive
+                          ? theme.palette.text.primary
+                          : theme.palette.text.secondary,
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </StyledDrawer>
+    </>
   );
 }
 
