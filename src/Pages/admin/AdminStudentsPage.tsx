@@ -80,19 +80,23 @@ const AdminStudentsPage: React.FC = () => {
 
   // Fetch all students
   useEffect(() => {
+    const abortController = new AbortController();
     const loadStudents = async () => {
       try {
-        const data = await fetchAllStudents();
+        const data = await fetchAllStudents(abortController.signal);
         setStudents(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Failed to fetch students:', error);
-        setError('Failed to load students');
-        setStudents([]);
+        if (error.name !== 'AbortError') {
+          console.error('Failed to fetch students:', error);
+          setError('Failed to load students');
+          setStudents([]);
+        }
       } finally {
         setLoading(false);
       }
     };
     loadStudents();
+    return () => abortController.abort();
   }, []);
 
   // Form handlers
@@ -101,14 +105,18 @@ const AdminStudentsPage: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    const requiredFields: Array<keyof StudentFormData> = [
-      'firstName', 'lastName', 'session', 
-      'department', 'rollNumber', 'email'
+    const requiredFields: Array<{name: keyof StudentFormData, label: string}> = [
+      {name: 'firstName', label: 'First Name'},
+      {name: 'lastName', label: 'Last Name'},
+      {name: 'session', label: 'Session'},
+      {name: 'department', label: 'Department'},
+      {name: 'rollNumber', label: 'Roll Number'},
+      {name: 'email', label: 'Email'}
     ];
 
     for (const field of requiredFields) {
-      if (!formData[field].trim()) {
-        setError(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+      if (!formData[field.name].trim()) {
+        setError(`${field.label} is required`);
         return false;
       }
     }
@@ -185,9 +193,12 @@ const AdminStudentsPage: React.FC = () => {
         ));
       } else {
         // For new students, all fields are required
-        const studId = `${formData.session}-${formData.department}-${formData.rollNumber}`;
+        if (!formData.session || !formData.department || !formData.rollNumber) {
+          throw new Error('Missing required fields for student ID generation');
+        }
+        const studId = `${formData.session}-${formData.department}-${formData.rollNumber}`.toUpperCase();
         const newStudent: StudentData = {
-          studentId: studId,
+          studentId: studId.replace(/\s+/g, '-'),
           firstName: formData.firstName,
           lastName: formData.lastName,
           session: formData.session,
@@ -281,9 +292,9 @@ const AdminStudentsPage: React.FC = () => {
                 {students.length > 0 ? (
                   students.map((student) => (
                     <TableRow key={student.studentId}>
-                      <TableCell>{student.studentId}</TableCell>
-                      <TableCell>{`${student.firstName} ${student.lastName}`}</TableCell>
-                      <TableCell>{student.email}</TableCell>
+                      <TableCell>{student.studentId || 'N/A'}</TableCell>
+                      <TableCell>{student.firstName ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}</TableCell>
+                      <TableCell>{student.email || 'No email provided'}</TableCell>
                       <TableCell>{student.department}</TableCell>
                       <TableCell>{student.session}</TableCell>
                       <TableCell>{student.rollNumber}</TableCell>
@@ -399,7 +410,7 @@ const AdminStudentsPage: React.FC = () => {
                 required={!currentStudent}
                 value={formData.password}
                 onChange={handleFormChange}
-                helperText={currentStudent ? "Leave blank to keep current password" : ""}
+                helperText={currentStudent ? "Leave blank to keep current password" : undefined}
               />
             </DialogContent>
             <DialogActions>
