@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// src/components/AdminNavDrawer.tsx
+import React from 'react';
 import {
   Drawer,
   List,
@@ -25,11 +26,12 @@ import {
   BarChart as BarChartIcon,
   Settings as SettingsIcon,
 } from "@mui/icons-material";
-import { useNavigate, useLocation } from "react-router-dom";
 
 interface AdminNavDrawerProps {
   open: boolean;
   onToggle: () => void;
+  onTabChange: (tab: string) => void;
+  activeTab: string;
 }
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
@@ -50,63 +52,52 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
 }));
 
-const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle }) => {
+const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabChange, activeTab }) => {
   const theme = useTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [activePath, setActivePath] = useState(location.pathname);
 
   const navItems = [
     {
       text: "Dashboard",
       icon: <DashboardIcon />,
-      path: "/admin",
+      tab: "dashboard",
       iconColor: theme.palette.primary.main,
     },
     {
       text: "Students",
       icon: <PeopleIcon />,
-      path: "/admin/students",
+      tab: "students",
       iconColor: theme.palette.secondary.main,
     },
     {
       text: "Classes",
       icon: <SchoolIcon />,
-      path: "/admin/classes",
+      tab: "classes",
       iconColor: theme.palette.success.main,
     },
     {
       text: "Enrollments",
       icon: <AssignmentIcon />,
-      path: "/admin/enrollments",
+      tab: "enrollments",
       iconColor: theme.palette.warning.main,
     },
     {
       text: "Reports",
       icon: <BarChartIcon />,
-      path: "/admin/reports",
+      tab: "reports",
       iconColor: theme.palette.info.main,
     },
     {
       text: "Settings",
       icon: <SettingsIcon />,
-      path: "/admin/settings",
+      tab: "settings",
       iconColor: theme.palette.error.main,
     },
   ];
 
-  useEffect(() => {
-    setActivePath(location.pathname);
-  }, [location]);
-
-  const handleNavigation = (path: string) => {
-    navigate(path);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("admin");
     localStorage.removeItem("token");
-    navigate("/");
+    window.location.href = "/";
   };
 
   return (
@@ -172,7 +163,7 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle }) => {
         <Toolbar />
         <List sx={{ px: 1 }}>
           {navItems.map((item) => {
-            const isActive = activePath === item.path;
+            const isActive = activeTab === item.tab;
             return (
               <ListItem
                 key={item.text}
@@ -186,7 +177,7 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle }) => {
                 }}
               >
                 <ListItemButton
-                  onClick={() => handleNavigation(item.path)}
+                  onClick={() => onTabChange(item.tab)}
                   sx={{
                     px: 2,
                     py: 1.25,
