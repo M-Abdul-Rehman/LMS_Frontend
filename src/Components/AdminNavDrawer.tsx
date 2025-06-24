@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   Drawer,
   List,
@@ -17,14 +18,16 @@ import {
 import {
   Menu as MenuIcon,
   Close as CloseIcon,
-  Home as HomeIcon,
-  DataUsage as DataUsageIcon,
-  MilitaryTech as MilitaryTechIcon,
+  Dashboard as DashboardIcon,
+  People as PeopleIcon,
+  School as SchoolIcon,
+  Assignment as AssignmentIcon,
+  BarChart as BarChartIcon,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-interface NavDrawerProps {
+interface AdminNavDrawerProps {
   open: boolean;
   onToggle: () => void;
 }
@@ -47,7 +50,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
 }));
 
-function NavDrawer({ open, onToggle }: NavDrawerProps) {
+const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,22 +58,40 @@ function NavDrawer({ open, onToggle }: NavDrawerProps) {
 
   const navItems = [
     {
-      text: "Home",
-      icon: <HomeIcon />,
-      path: "/home",
+      text: "Dashboard",
+      icon: <DashboardIcon />,
+      path: "/admin",
       iconColor: theme.palette.primary.main,
     },
     {
-      text: "Enrollment",
-      icon: <DataUsageIcon />,
-      path: "/enrollment",
+      text: "Students",
+      icon: <PeopleIcon />,
+      path: "/admin/students",
       iconColor: theme.palette.secondary.main,
     },
     {
-      text: "Result",
-      icon: <MilitaryTechIcon />,
-      path: "/exam/result",
+      text: "Classes",
+      icon: <SchoolIcon />,
+      path: "/admin/classes",
       iconColor: theme.palette.success.main,
+    },
+    {
+      text: "Enrollments",
+      icon: <AssignmentIcon />,
+      path: "/admin/enrollments",
+      iconColor: theme.palette.warning.main,
+    },
+    {
+      text: "Reports",
+      icon: <BarChartIcon />,
+      path: "/admin/reports",
+      iconColor: theme.palette.info.main,
+    },
+    {
+      text: "Settings",
+      icon: <SettingsIcon />,
+      path: "/admin/settings",
+      iconColor: theme.palette.error.main,
     },
   ];
 
@@ -83,7 +104,7 @@ function NavDrawer({ open, onToggle }: NavDrawerProps) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("student");
+    localStorage.removeItem("admin");
     localStorage.removeItem("token");
     navigate("/");
   };
@@ -110,7 +131,7 @@ function NavDrawer({ open, onToggle }: NavDrawerProps) {
               {open ? <CloseIcon /> : <MenuIcon />}
             </IconButton>
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Learning Management System
+              Admin Panel - LMS
             </Typography>
           </Box>
           <Button
@@ -148,8 +169,7 @@ function NavDrawer({ open, onToggle }: NavDrawerProps) {
           },
         }}
       >
-        <Toolbar />{" "}
-        {/* This empty Toolbar is for proper spacing below the AppBar */}
+        <Toolbar />
         <List sx={{ px: 1 }}>
           {navItems.map((item) => {
             const isActive = activePath === item.path;
@@ -206,6 +226,6 @@ function NavDrawer({ open, onToggle }: NavDrawerProps) {
       </StyledDrawer>
     </>
   );
-}
+};
 
-export default NavDrawer;
+export default AdminNavDrawer;

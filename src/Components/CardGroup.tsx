@@ -4,7 +4,7 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import SchoolIcon from "@mui/icons-material/School";
 import PeopleIcon from "@mui/icons-material/People";
 
-function CardGroup() {
+const CardGroup: React.FC = () => {
   const theme = useTheme();
   const student = localStorage.getItem("student");
   const studentData = student ? JSON.parse(student) : null;
@@ -15,28 +15,28 @@ function CardGroup() {
       label: "Enrolled Semester",
       value: studentData?.session || "N/A",
       color: theme.palette.primary.main,
-      bgColor: theme.palette.primary.light
+      bgColor: theme.palette.primary.light,
     },
     {
       icon: <CreditCardIcon />,
       label: "Outstanding Fees",
       value: "0",
       color: theme.palette.success.main,
-      bgColor: theme.palette.success.light
+      bgColor: theme.palette.success.light,
     },
     {
       icon: <SchoolIcon />,
       label: "CGPA",
       value: "3.00",
       color: theme.palette.warning.main,
-      bgColor: theme.palette.warning.light
+      bgColor: theme.palette.warning.light,
     },
     {
       icon: <PeopleIcon />,
       label: "Class Section",
       value: "D",
       color: theme.palette.info.main,
-      bgColor: theme.palette.info.light
+      bgColor: theme.palette.info.light,
     },
   ];
 
@@ -47,7 +47,7 @@ function CardGroup() {
         gridTemplateColumns: {
           xs: "1fr",
           sm: "repeat(2, 1fr)",
-          md: "repeat(4, 1fr)"
+          md: "repeat(4, 1fr)",
         },
         gap: 3,
       }}
@@ -67,8 +67,8 @@ function CardGroup() {
             transition: "all 0.3s ease",
             "&:hover": {
               transform: "translateY(-5px)",
-              boxShadow: theme.shadows[4]
-            }
+              boxShadow: theme.shadows[4],
+            },
           }}
         >
           <Box
@@ -81,28 +81,28 @@ function CardGroup() {
               backgroundColor: theme.palette.background.paper,
               borderRadius: "50%",
               mb: 2,
-              boxShadow: 1
+              boxShadow: 1,
             }}
           >
             <Box sx={{ color: card.color }}>{card.icon}</Box>
           </Box>
-          
-          <Typography 
-            variant="h6" 
-            sx={{ 
+
+          <Typography
+            variant="h6"
+            sx={{
               fontWeight: 600,
               color: theme.palette.text.primary,
-              mb: 1
+              mb: 1,
             }}
           >
             {card.label}
           </Typography>
-          
-          <Typography 
-            variant="h5" 
-            sx={{ 
+
+          <Typography
+            variant="h5"
+            sx={{
               fontWeight: 700,
-              color: card.color
+              color: card.color,
             }}
           >
             {card.value}
@@ -111,6 +111,6 @@ function CardGroup() {
       ))}
     </Box>
   );
-}
+};
 
 export default CardGroup;

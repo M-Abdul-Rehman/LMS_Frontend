@@ -1,72 +1,76 @@
 import { Box, Typography, useTheme } from "@mui/material";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from "@mui/material";
 
-function DataTables() {
+const DataTables: React.FC = () => {
   const theme = useTheme();
 
   const academicCalendar = [
     { activity: "Enrollment Start", date: "10 March 2024" },
     { activity: "Semester Start", date: "11 March 2024" },
     { activity: "Enrollment End", date: "19 March 2024" },
-    { activity: "Semester Freeze", date: "20 March 2024" }
+    { activity: "Semester Freeze", date: "20 March 2024" },
   ];
 
   const currentCourses = [
-    { 
-      course: "Computer Science 101", 
-      teacher: "Sir Ali Ahmed", 
-      type: "Theory", 
-      present: 10, 
-      absent: 1, 
-      percentage: "90%" 
+    {
+      course: "Computer Science 101",
+      teacher: "Sir Ali Ahmed",
+      type: "Theory",
+      present: 10,
+      absent: 1,
+      percentage: "90%",
     },
-    { 
-      course: "Mathematics", 
-      teacher: "Dr. Sarah Khan", 
-      type: "Theory", 
-      present: 8, 
-      absent: 2, 
-      percentage: "80%" 
+    {
+      course: "Mathematics",
+      teacher: "Dr. Sarah Khan",
+      type: "Theory",
+      present: 8,
+      absent: 2,
+      percentage: "80%",
     },
-    { 
-      course: "Software Lab", 
-      teacher: "Prof. Ahmed Raza", 
-      type: "Practical", 
-      present: 12, 
-      absent: 0, 
-      percentage: "100%" 
-    }
+    {
+      course: "Software Lab",
+      teacher: "Prof. Ahmed Raza",
+      type: "Practical",
+      present: 12,
+      absent: 0,
+      percentage: "100%",
+    },
   ];
 
   return (
-    <Box sx={{ 
-      display: "flex", 
-      flexDirection: { xs: "column", md: "row" },
-      gap: 4,
-      mt: 4
-    }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        gap: 4,
+        mt: 4,
+      }}
+    >
       {/* Academic Calendar Table */}
-      <Box sx={{ 
-        flex: 1,
-        boxShadow: theme.shadows[2],
-        borderRadius: 2,
-        overflow: "hidden"
-      }}>
+      <Box
+        sx={{
+          flex: 1,
+          boxShadow: theme.shadows[2],
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
         <Typography
           sx={{
             backgroundColor: theme.palette.primary.main,
             p: 2,
             color: theme.palette.primary.contrastText,
             fontWeight: 600,
-            fontSize: { xs: "1rem", sm: "1.1rem" }
+            fontSize: { xs: "1rem", sm: "1.1rem" },
           }}
         >
           Academic Calendar
@@ -81,10 +85,10 @@ function DataTables() {
             </TableHead>
             <TableBody>
               {academicCalendar.map((item, index) => (
-                <TableRow 
-                  key={index} 
+                <TableRow
+                  key={index}
                   hover
-                  sx={{ '&:last-child td': { borderBottom: 0 } }}
+                  sx={{ "&:last-child td": { borderBottom: 0 } }}
                 >
                   <TableCell>{item.activity}</TableCell>
                   <TableCell>{item.date}</TableCell>
@@ -96,19 +100,21 @@ function DataTables() {
       </Box>
 
       {/* Current Courses Table */}
-      <Box sx={{ 
-        flex: 1,
-        boxShadow: theme.shadows[2],
-        borderRadius: 2,
-        overflow: "hidden"
-      }}>
+      <Box
+        sx={{
+          flex: 1,
+          boxShadow: theme.shadows[2],
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
         <Typography
           sx={{
             backgroundColor: theme.palette.secondary.main,
             p: 2,
             color: theme.palette.secondary.contrastText,
             fontWeight: 600,
-            fontSize: { xs: "1rem", sm: "1.1rem" }
+            fontSize: { xs: "1rem", sm: "1.1rem" },
           }}
         >
           Current Courses
@@ -122,15 +128,15 @@ function DataTables() {
                 <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Present</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Absent</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>%</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Percentage</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {currentCourses.map((course, index) => (
-                <TableRow 
-                  key={index} 
+                <TableRow
+                  key={index}
                   hover
-                  sx={{ '&:last-child td': { borderBottom: 0 } }}
+                  sx={{ "&:last-child td": { borderBottom: 0 } }}
                 >
                   <TableCell>{course.course}</TableCell>
                   <TableCell>{course.teacher}</TableCell>
@@ -146,6 +152,6 @@ function DataTables() {
       </Box>
     </Box>
   );
-}
+};
 
 export default DataTables;

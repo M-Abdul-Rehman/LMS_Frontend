@@ -1,8 +1,15 @@
-import { Box, CircularProgress, useTheme, styled, Typography } from "@mui/material";
-import NavDrawer from "../Components/NavDrawer";
-import CardGroup from "../Components/CardGroup";
-import DataTables from "../Components/DataTables";
-import { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Grid,
+  Typography,
+  useTheme,
+  styled,
+  CircularProgress,
+} from '@mui/material';
+import AdminNavDrawer from '../../Components/AdminNavDrawer';
+import AdminStatsCards from '../../Components/AdminStatsCards';
+import AdminRecentActivity from '../../Components/AdminRecentActivity';
 
 const DashboardWrapper = styled(Box)({
   display: "flex",
@@ -25,11 +32,10 @@ const ContentArea = styled(Box)(({ theme }) => ({
   overflowY: "auto",
 }));
 
-function Home() {
+const AdminDashboard: React.FC = () => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
@@ -57,7 +63,7 @@ function Home() {
 
   return (
     <DashboardWrapper>
-      <NavDrawer open={drawerOpen} onToggle={handleDrawerToggle} />
+      <AdminNavDrawer open={drawerOpen} onToggle={handleDrawerToggle} />
       
       <MainContent sx={{ 
         ml: drawerOpen ? '240px' : '56px',
@@ -66,26 +72,24 @@ function Home() {
           duration: theme.transitions.duration.enteringScreen,
         }),
       }}>
-        <ContentArea ref={contentRef}>
+        <ContentArea>
           <Typography variant="h4" gutterBottom sx={{ 
             fontWeight: 600,
             mb: 4,
             color: theme.palette.text.primary
           }}>
-            Dashboard
+            Admin Dashboard
           </Typography>
           
-          <Box sx={{ mb: 4 }}>
-            <CardGroup />
-          </Box>
+          <AdminStatsCards />
           
-          <Box>
-            <DataTables />
-          </Box>
+          <Grid container spacing={4} sx={{ mt: 2 }}>
+              <AdminRecentActivity />
+          </Grid>
         </ContentArea>
       </MainContent>
     </DashboardWrapper>
   );
-}
+};
 
-export default Home;
+export default AdminDashboard;
