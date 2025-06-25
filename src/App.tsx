@@ -1,10 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import Login from "./Pages/Login";
 import ProtectedRoute from "./Components/ProtectedRoutes";
-import AdminDashboard from "./Pages/admin/AdminDashboard";
-import AdminStudentsPage from "./Pages/admin/AdminStudentsPage";
-import AdminClassesPage from "./Pages/admin/AdminClassesPage";
 import MainPage from "./Pages/MainPage";
+import AdminPage from "./Pages/admin/AdminPage";
 
 function App() {
   return (
@@ -20,30 +18,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/students"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminStudentsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/classes"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminClassesPage />
-              </ProtectedRoute>
-            }
-          />
+<Route
+  path="/admin"
+  element={
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AdminPage />
+    </ProtectedRoute>
+  }
+/>
         </Routes>
       </BrowserRouter>
     </div>
