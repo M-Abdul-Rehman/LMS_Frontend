@@ -1,11 +1,6 @@
 // src/pages/admin/AdminPage.tsx
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  useTheme,
-  styled,
-} from "@mui/material";
+import { Box, Typography, useTheme, styled } from "@mui/material";
 import AdminNavDrawer from "../../Components/AdminNavDrawer";
 import AdminStatsCards from "../../Components/AdminStatsCards";
 import AdminRecentActivity from "../../Components/AdminRecentActivity";
@@ -24,6 +19,7 @@ import {
   registerClass,
 } from "../../api/classApi";
 import { StudentData, ClassData } from "../../api/types";
+import AdminEnrollmentsContent from "../../Components/AdminEnrollmentsContent";
 
 const DashboardWrapper = styled(Box)({
   display: "flex",
@@ -110,11 +106,16 @@ const AdminPage = () => {
     }
   };
 
-  const handleUpdateStudent = async (studentId: string, studentData: Partial<StudentData>) => {
+  const handleUpdateStudent = async (
+    studentId: string,
+    studentData: Partial<StudentData>
+  ) => {
     try {
       setIsLoading(true);
       const updatedStudent = await updateStudent(studentId, studentData);
-      setStudents(students.map(s => s.studentId === studentId ? updatedStudent : s));
+      setStudents(
+        students.map((s) => (s.studentId === studentId ? updatedStudent : s))
+      );
       return true;
     } catch (err: any) {
       setError(err.message || "Failed to update student");
@@ -128,7 +129,7 @@ const AdminPage = () => {
     try {
       setIsLoading(true);
       await deleteStudent(studentId);
-      setStudents(students.filter(s => s.studentId !== studentId));
+      setStudents(students.filter((s) => s.studentId !== studentId));
       return true;
     } catch (err: any) {
       setError(err.message || "Failed to delete student");
@@ -138,7 +139,7 @@ const AdminPage = () => {
     }
   };
 
-  const handleAddClass = async (classData: Omit<ClassData, 'id'>) => {
+  const handleAddClass = async (classData: Omit<ClassData, "id">) => {
     try {
       setIsLoading(true);
       const newClass = await registerClass(classData);
@@ -152,11 +153,14 @@ const AdminPage = () => {
     }
   };
 
-  const handleUpdateClass = async (classId: string, classData: Partial<ClassData>) => {
+  const handleUpdateClass = async (
+    classId: string,
+    classData: Partial<ClassData>
+  ) => {
     try {
       setIsLoading(true);
       const updatedClass = await updateClass(classId, classData);
-      setClasses(classes.map(c => c.id === classId ? updatedClass : c));
+      setClasses(classes.map((c) => (c.id === classId ? updatedClass : c)));
       return true;
     } catch (err: any) {
       setError(err.message || "Failed to update class");
@@ -170,7 +174,7 @@ const AdminPage = () => {
     try {
       setIsLoading(true);
       await deleteClass(classId);
-      setClasses(classes.filter(c => c.id !== classId));
+      setClasses(classes.filter((c) => c.id !== classId));
       return true;
     } catch (err: any) {
       setError(err.message || "Failed to delete class");
@@ -215,6 +219,8 @@ const AdminPage = () => {
             onDeleteClass={handleDeleteClass}
           />
         );
+      case "enrollments":
+        return <AdminEnrollmentsContent />;
       default:
         return <AdminStatsCards />;
     }
@@ -222,8 +228,8 @@ const AdminPage = () => {
 
   return (
     <DashboardWrapper>
-      <AdminNavDrawer 
-        open={drawerOpen} 
+      <AdminNavDrawer
+        open={drawerOpen}
         onToggle={handleDrawerToggle}
         onTabChange={handleTabChange}
         activeTab={activeTab}
@@ -238,6 +244,7 @@ const AdminPage = () => {
             {activeTab === "dashboard" && "Admin Dashboard"}
             {activeTab === "students" && "Student Management"}
             {activeTab === "classes" && "Class Management"}
+            {activeTab === "enrollments" && "Enrollment Management"}
           </Typography>
           {renderContent()}
         </ContentArea>
