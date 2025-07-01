@@ -1,16 +1,6 @@
 // src/api/studentApi.ts
 import axios from 'axios';
-
-export interface StudentData {
-  studentId?: string;
-  firstName?: string;
-  lastName?: string;
-  session?: string;
-  department?: string;
-  rollNumber?: string;
-  email?: string;
-  password?: string;
-}
+import { StudentData } from './types';
 
 const BASE_URL = 'http://localhost:5000/students';
 
@@ -40,7 +30,7 @@ export const fetchAllStudents = async () => {
 export const fetchStudentById = async (studentId: string) => {
   try {
     const response = await axios.get(`${BASE_URL}/${studentId}`);
-    return response.data;
+    return response.data as StudentData;
   } catch (error: any) {
     console.error(`Error fetching student with ID ${studentId}:`, error);
     throw error.response?.data || error;

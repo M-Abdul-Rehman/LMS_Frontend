@@ -1,14 +1,14 @@
 // src/api/types.ts
 
 export interface StudentData {
-  studentId?: string;
-  firstName?: string;
-  lastName?: string;
-  session?: string;
-  department?: string;
-  rollNumber?: string;
-  email?: string;
-  password?: string;
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  session: string;
+  department: string;
+  rollNumber: string;
+  email: string;
+  password?: string; // Keep password optional
 }
 
 export interface ClassData {

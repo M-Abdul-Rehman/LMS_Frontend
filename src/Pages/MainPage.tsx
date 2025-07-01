@@ -1,52 +1,48 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import MainLayout from "../Components/MainLayout";
 import DashboardContent from "../Components/DashboardContent";
 import EnrollmentContent from "../Components/EnrollmentContent";
 import ResultContent from "../Components/ResultContent";
-import { fetchStudentById } from "../api/studentApi";
-import { fetchAllClasses } from "../api/classApi";
-import { ClassData } from "../api/classApi";
+import { getStudent } from "../features/student/studentSlice";
+import { getClasses } from "../features/class/classSlice";
+import { fetchEnrollments } from "../features/enrollment/enrollmentSlice";
+import { setActiveTab, setAcademicYear } from "../features/ui/uiSlice";
 import { SelectChangeEvent } from "@mui/material";
+import { StudentData } from "../api/types";
 
 const MainPage = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [isLoading, setIsLoading] = useState(false);
-  const [studentInfo, setStudentInfo] = useState(null);
-  const [classes, setClasses] = useState<ClassData[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [academicYear, setAcademicYear] = useState("Fa2021");
+  const dispatch = useAppDispatch();
+  const { activeTab, academicYear } = useAppSelector((state) => state.ui);
+  const { student } = useAppSelector((state) => state.student);
+  const { classes } = useAppSelector((state) => state.classes);
+  const { enrollments } = useAppSelector((state) => state.enrollments);
 
   useEffect(() => {
     if (activeTab === "enrollment") {
-      loadEnrollmentData();
-    }
-  }, [activeTab]);
-
-  const loadEnrollmentData = async () => {
-    try {
-      setIsLoading(true);
-      const student = JSON.parse(localStorage.getItem("student") || "{}");
-      if (student?.studentId) {
-        const studentData = await fetchStudentById(student.studentId);
-        setStudentInfo(studentData);
+      const studentFromStorage = JSON.parse(
+        localStorage.getItem("student") || "{}"
+      );
+      if (studentFromStorage?.studentId) {
+        dispatch(getStudent(studentFromStorage.studentId));
+        dispatch(getClasses());
+        dispatch(fetchEnrollments(studentFromStorage.studentId));
       }
-      const allClasses = await fetchAllClasses();
-      setClasses(allClasses);
-    } catch (err) {
-      setError("Failed to load enrollment data");
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [activeTab, dispatch]);
 
   const handleDownloadForm = () => {
     console.log("Downloading enrollment form");
   };
 
   const handleYearChange = (event: SelectChangeEvent<string>) => {
-    setAcademicYear(event.target.value);
+    dispatch(setAcademicYear(event.target.value));
   };
-
+  const isValidStudent = (
+    student: StudentData | null
+  ): student is StudentData => {
+    return !!student?.studentId;
+  };
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -54,9 +50,9 @@ const MainPage = () => {
       case "enrollment":
         return (
           <EnrollmentContent
-            studentInfo={studentInfo}
+            studentInfo={isValidStudent(student) ? student : null}
             classes={classes}
-            error={error}
+            enrollments={enrollments}
             onDownload={handleDownloadForm}
           />
         );
@@ -73,7 +69,6 @@ const MainPage = () => {
                 teacher: "Ali Ahmed",
                 grade: "B+",
               },
-              // ... other courses
             ]}
           />
         );
@@ -83,10 +78,9 @@ const MainPage = () => {
   };
 
   return (
-    <MainLayout 
-      isLoading={isLoading}
+    <MainLayout
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={(tab) => dispatch(setActiveTab(tab))}
     >
       {renderContent()}
     </MainLayout>

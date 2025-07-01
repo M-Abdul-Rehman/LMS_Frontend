@@ -18,7 +18,6 @@ import {
   useTheme,
   Theme,
 } from "@mui/material";
-
 import {
   Menu as MenuIcon,
   ChevronLeft,
@@ -27,6 +26,8 @@ import {
   Assignment,
   ExitToApp,
 } from "@mui/icons-material";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { setActiveTab } from "../features/ui/uiSlice";
 
 interface NavItem {
   text: string;
@@ -92,12 +93,13 @@ const DrawerHeader = styled("div")(({ theme }: { theme: Theme }) => ({
 
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
-  isLoading = false,
   activeTab,
   onTabChange,
 }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(true);
+  const { isLoading } = useAppSelector((state) => state.ui);
+  const dispatch = useAppDispatch();
 
   const handleDrawerToggle = () => setOpen(!open);
 
@@ -105,6 +107,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     localStorage.removeItem("student");
     localStorage.removeItem("token");
     window.location.href = "/";
+  };
+
+  const handleTabChange = (tab: string) => {
+    dispatch(setActiveTab(tab));
+    onTabChange(tab);
   };
 
   const navItems: NavItem[] = [
@@ -155,7 +162,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           {navItems.map((item) => (
             <ListItem key={item.tab} disablePadding sx={{ display: "block" }}>
               <ListItemButton
-                onClick={() => onTabChange(item.tab)}
+                onClick={() => handleTabChange(item.tab)}
                 selected={activeTab === item.tab}
                 sx={{
                   minHeight: 48,
