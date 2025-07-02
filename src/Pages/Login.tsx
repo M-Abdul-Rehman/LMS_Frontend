@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import { loginSuccess } from "../features/auth/authSlice";
+import { loginStudent } from "../api/studentApi";
 import {
   Box,
   Card,
@@ -12,19 +16,19 @@ import {
   FormControl,
   Typography,
 } from "@mui/material";
-import { loginStudent } from "../api/studentApi";
-import { useNavigate } from "react-router";
 
 const sessions = ["Fa2020", "Fa2021", "Fa2022", "Fa2023"];
 const departments = ["CS", "EE", "ME", "CE"];
 
-const Login : React.FC = () => {
+const Login: React.FC = () => {
   const [session, setSession] = useState("");
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [password, setPassword] = useState("");
-  let navigate = useNavigate();
-  const handleLogin = async() => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
     if (!session || !department || !rollNumber || !password) {
       alert("Please fill all fields");
       return;
@@ -34,7 +38,11 @@ const Login : React.FC = () => {
 
     try {
       const res = await loginStudent(studentId, password);
-      localStorage.setItem("token", res.access_token);
+      dispatch(loginSuccess({ 
+        token: res.access_token, 
+        role: "student",
+        studentId 
+      }));
       localStorage.setItem("student", JSON.stringify(res.student));
       navigate("/home");
     } catch (error) {
@@ -127,6 +135,6 @@ const Login : React.FC = () => {
       </Card>
     </Box>
   );
-}
+};
 
 export default Login;

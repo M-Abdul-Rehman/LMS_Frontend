@@ -9,7 +9,6 @@ import { getClasses } from "../features/class/classSlice";
 import { fetchEnrollments } from "../features/enrollment/enrollmentSlice";
 import { setActiveTab, setAcademicYear } from "../features/ui/uiSlice";
 import { SelectChangeEvent } from "@mui/material";
-import { StudentData } from "../api/types";
 
 const MainPage = () => {
   const dispatch = useAppDispatch();
@@ -17,19 +16,15 @@ const MainPage = () => {
   const { student } = useAppSelector((state) => state.student);
   const { classes } = useAppSelector((state) => state.classes);
   const { enrollments } = useAppSelector((state) => state.enrollments);
+  const { studentId } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    if (activeTab === "enrollment") {
-      const studentFromStorage = JSON.parse(
-        localStorage.getItem("student") || "{}"
-      );
-      if (studentFromStorage?.studentId) {
-        dispatch(getStudent(studentFromStorage.studentId));
-        dispatch(getClasses());
-        dispatch(fetchEnrollments(studentFromStorage.studentId));
-      }
+    if (activeTab === "enrollment" && studentId) {
+      dispatch(getStudent(studentId));
+      dispatch(getClasses());
+      dispatch(fetchEnrollments(studentId));
     }
-  }, [activeTab, dispatch]);
+  }, [activeTab, dispatch, studentId]);
 
   const handleDownloadForm = () => {
     console.log("Downloading enrollment form");
@@ -38,11 +33,7 @@ const MainPage = () => {
   const handleYearChange = (event: SelectChangeEvent<string>) => {
     dispatch(setAcademicYear(event.target.value));
   };
-  const isValidStudent = (
-    student: StudentData | null
-  ): student is StudentData => {
-    return !!student?.studentId;
-  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -50,7 +41,7 @@ const MainPage = () => {
       case "enrollment":
         return (
           <EnrollmentContent
-            studentInfo={isValidStudent(student) ? student : null}
+            studentInfo={student}
             classes={classes}
             enrollments={enrollments}
             onDownload={handleDownloadForm}
@@ -78,7 +69,7 @@ const MainPage = () => {
   };
 
   return (
-    <MainLayout
+    <MainLayout 
       activeTab={activeTab}
       onTabChange={(tab) => dispatch(setActiveTab(tab))}
     >

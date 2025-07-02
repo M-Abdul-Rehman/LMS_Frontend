@@ -1,186 +1,108 @@
-// src/pages/admin/AdminPage.tsx
 import { useState, useEffect } from "react";
-import { Box, Typography, useTheme, styled } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { 
+  Box, 
+  Typography, 
+  useTheme, 
+  Paper,
+  CircularProgress,
+  Alert
+} from "@mui/material";
 import AdminNavDrawer from "../../Components/AdminNavDrawer";
 import AdminStatsCards from "../../Components/AdminStatsCards";
 import AdminRecentActivity from "../../Components/AdminRecentActivity";
 import AdminStudentsContent from "../../Components/AdminStudentsContent";
 import AdminClassesContent from "../../Components/AdminClassesContent";
-import {
-  fetchAllStudents,
-  deleteStudent,
-  updateStudent,
-  registerStudent,
-} from "../../api/studentApi";
-import {
-  fetchAllClasses,
-  deleteClass,
-  updateClass,
-  registerClass,
-} from "../../api/classApi";
-import { StudentData, ClassData } from "../../api/types";
 import AdminEnrollmentsContent from "../../Components/AdminEnrollmentsContent";
+import { fetchAdminStudents, fetchAdminClasses } from "../../features/admin/adminSlice";
+import { setActiveTab, setIsLoading } from "../../features/ui/uiSlice";
+import { StudentData } from "../../api/types";
+import { ClassData } from "../../api/classApi";
+import { registerStudent, updateStudent, deleteStudent } from "../../api/studentApi";
+import { registerClass, updateClass, deleteClass } from "../../api/classApi";
 
-const DashboardWrapper = styled(Box)({
-  display: "flex",
-  minHeight: "100vh",
-  position: "relative",
-  overflow: "hidden",
-});
-
-const MainContent = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "open",
-})<{ open: boolean }>(({ theme, open }) => ({
-  flex: 1,
-  display: "flex",
-  flexDirection: "column",
-  minWidth: 0,
-  marginLeft: open ? 240 : 56,
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-}));
-
-const ContentArea = styled(Box)(({ theme }) => ({
-  flex: 1,
-  padding: theme.spacing(4),
-  marginTop: theme.spacing(8),
-  overflowY: "auto",
-}));
 
 const AdminPage = () => {
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [isLoading, setIsLoading] = useState(false);
-  const [students, setStudents] = useState<StudentData[]>([]);
-  const [classes, setClasses] = useState<ClassData[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { activeTab } = useAppSelector((state) => state.ui);
+  const { students, classes, loading, error } = useAppSelector((state) => state.admin);
   const [drawerOpen, setDrawerOpen] = useState(true);
 
   useEffect(() => {
     if (activeTab === "students" || activeTab === "classes") {
-      loadData();
-    }
-  }, [activeTab]);
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
+      dispatch(setIsLoading(true));
       if (activeTab === "students") {
-        const studentsData = await fetchAllStudents();
-        setStudents(studentsData);
+        dispatch(fetchAdminStudents());
       } else if (activeTab === "classes") {
-        const classesData = await fetchAllClasses();
-        setClasses(classesData);
+        dispatch(fetchAdminClasses());
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to load data");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
+  }, [activeTab, dispatch]);
 
   const handleAddStudent = async (studentData: StudentData) => {
     try {
-      setIsLoading(true);
-      const newStudent = await registerStudent(studentData);
-      setStudents([...students, newStudent]);
+      await registerStudent(studentData);
+      dispatch(fetchAdminStudents());
       return true;
-    } catch (err: any) {
-      setError(err.message || "Failed to add student");
+    } catch (err) {
+      console.error("Failed to add student:", err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleUpdateStudent = async (
-    studentId: string,
-    studentData: Partial<StudentData>
-  ) => {
+  const handleUpdateStudent = async (studentId: string, data: Partial<StudentData>) => {
     try {
-      setIsLoading(true);
-      const updatedStudent = await updateStudent(studentId, studentData);
-      setStudents(
-        students.map((s) => (s.studentId === studentId ? updatedStudent : s))
-      );
+      await updateStudent(studentId, data);
+      dispatch(fetchAdminStudents());
       return true;
-    } catch (err: any) {
-      setError(err.message || "Failed to update student");
+    } catch (err) {
+      console.error("Failed to update student:", err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleDeleteStudent = async (studentId: string) => {
     try {
-      setIsLoading(true);
       await deleteStudent(studentId);
-      setStudents(students.filter((s) => s.studentId !== studentId));
+      dispatch(fetchAdminStudents());
       return true;
-    } catch (err: any) {
-      setError(err.message || "Failed to delete student");
+    } catch (err) {
+      console.error("Failed to delete student:", err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleAddClass = async (classData: Omit<ClassData, "id">) => {
+  const handleAddClass = async (classData: Omit<ClassData, 'id'>) => {
     try {
-      setIsLoading(true);
-      const newClass = await registerClass(classData);
-      setClasses([...classes, newClass]);
+      await registerClass(classData);
+      dispatch(fetchAdminClasses());
       return true;
-    } catch (err: any) {
-      setError(err.message || "Failed to add class");
+    } catch (err) {
+      console.error("Failed to add class:", err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleUpdateClass = async (
-    classId: string,
-    classData: Partial<ClassData>
-  ) => {
+  const handleUpdateClass = async (classId: string, data: Partial<ClassData>) => {
     try {
-      setIsLoading(true);
-      const updatedClass = await updateClass(classId, classData);
-      setClasses(classes.map((c) => (c.id === classId ? updatedClass : c)));
+      await updateClass(classId, data);
+      dispatch(fetchAdminClasses());
       return true;
-    } catch (err: any) {
-      setError(err.message || "Failed to update class");
+    } catch (err) {
+      console.error("Failed to update class:", err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleDeleteClass = async (classId: string) => {
     try {
-      setIsLoading(true);
       await deleteClass(classId);
-      setClasses(classes.filter((c) => c.id !== classId));
+      dispatch(fetchAdminClasses());
       return true;
-    } catch (err: any) {
-      setError(err.message || "Failed to delete class");
+    } catch (err) {
+      console.error("Failed to delete class:", err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -197,59 +119,109 @@ const AdminPage = () => {
         );
       case "students":
         return (
-          <AdminStudentsContent
-            students={students}
-            isLoading={isLoading}
-            error={error}
-            onRefresh={loadData}
-            onAddStudent={handleAddStudent}
-            onUpdateStudent={handleUpdateStudent}
-            onDeleteStudent={handleDeleteStudent}
-          />
+          <Paper elevation={3} sx={{ p: 3 }}>
+            {loading && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+            <AdminStudentsContent
+              students={students}
+              isLoading={loading}
+              error={error}
+              onRefresh={() => dispatch(fetchAdminStudents())}
+              onAddStudent={handleAddStudent}
+              onUpdateStudent={handleUpdateStudent}
+              onDeleteStudent={handleDeleteStudent}
+            />
+          </Paper>
         );
       case "classes":
         return (
-          <AdminClassesContent
-            classes={classes}
-            isLoading={isLoading}
-            error={error}
-            onRefresh={loadData}
-            onAddClass={handleAddClass}
-            onUpdateClass={handleUpdateClass}
-            onDeleteClass={handleDeleteClass}
-          />
+          <Paper elevation={3} sx={{ p: 3 }}>
+            {loading && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+            <AdminClassesContent
+              classes={classes}
+              isLoading={loading}
+              error={error}
+              onRefresh={() => dispatch(fetchAdminClasses())}
+              onAddClass={handleAddClass}
+              onUpdateClass={handleUpdateClass}
+              onDeleteClass={handleDeleteClass}
+            />
+          </Paper>
         );
       case "enrollments":
-        return <AdminEnrollmentsContent />;
+        return (
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <AdminEnrollmentsContent />
+          </Paper>
+        );
       default:
-        return <AdminStatsCards />;
+        return (
+          <>
+            <AdminStatsCards />
+            <Box sx={{ mt: 4 }}>
+              <AdminRecentActivity />
+            </Box>
+          </>
+        );
     }
   };
 
   return (
-    <DashboardWrapper>
+    <Box sx={{ display: 'flex' }}>
       <AdminNavDrawer
         open={drawerOpen}
-        onToggle={handleDrawerToggle}
-        onTabChange={handleTabChange}
+        onToggle={() => setDrawerOpen(!drawerOpen)}
+        onTabChange={(tab) => dispatch(setActiveTab(tab))}
         activeTab={activeTab}
       />
-      <MainContent open={drawerOpen}>
-        <ContentArea>
-          <Typography variant="h4" gutterBottom sx={{ 
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          marginTop: '64px', // Matches AppBar height
+          marginLeft: `0px`,
+          transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+          width: `100%`,
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          gutterBottom 
+          sx={{ 
             fontWeight: 600,
             mb: 4,
             color: theme.palette.text.primary
-          }}>
-            {activeTab === "dashboard" && "Admin Dashboard"}
-            {activeTab === "students" && "Student Management"}
-            {activeTab === "classes" && "Class Management"}
-            {activeTab === "enrollments" && "Enrollment Management"}
-          </Typography>
-          {renderContent()}
-        </ContentArea>
-      </MainContent>
-    </DashboardWrapper>
+          }}
+        >
+          {activeTab === "dashboard" && "Admin Dashboard"}
+          {activeTab === "students" && "Student Management"}
+          {activeTab === "classes" && "Class Management"}
+          {activeTab === "enrollments" && "Enrollment Management"}
+        </Typography>
+        {renderContent()}
+      </Box>
+    </Box>
   );
 };
 

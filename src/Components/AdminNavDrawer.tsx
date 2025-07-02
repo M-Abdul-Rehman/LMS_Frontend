@@ -34,22 +34,58 @@ interface AdminNavDrawerProps {
   activeTab: string;
 }
 
+const drawerWidth = 240;
+const miniDrawerWidth = 56;
+
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
   "& .MuiDrawer-paper": {
     overflowX: "hidden",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    whiteSpace: "nowrap",
+    width: drawerWidth,
+    [theme.breakpoints.down("sm")]: {
+      width: miniDrawerWidth,
+    },
+  },
+  "& .MuiDrawer-paperClose": {
+    overflowX: "hidden",
+    transition: theme.transitions.create("width", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    width: miniDrawerWidth,
   },
 }));
 
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
+const StyledAppBar = styled(AppBar, {
+  shouldForwardProp: (prop) => prop !== "open",
+})<{ open: boolean }>(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
   boxShadow: theme.shadows[1],
-  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(["width", "margin"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+  ...(!open && {
+    marginLeft: miniDrawerWidth,
+    width: `calc(100% - ${miniDrawerWidth}px)`,
+  }),
 }));
 
 const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabChange, activeTab }) => {
@@ -102,7 +138,7 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabCh
 
   return (
     <>
-      <StyledAppBar position="fixed">
+      <StyledAppBar position="fixed" open={open}>
         <Toolbar
           sx={{
             display: "flex",
@@ -144,19 +180,19 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabCh
       <StyledDrawer
         variant="permanent"
         open={open}
+        className={open ? "" : "MuiDrawer-paperClose"}
         sx={{
-          width: open ? 240 : 56,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: open ? 240 : 56,
-            boxSizing: "border-box",
+          "& .MuiDrawer-paper": {
+            width: open ? drawerWidth : miniDrawerWidth,
+            transition: theme.transitions.create("width", {
+              easing: theme.transitions.easing.sharp,
+              duration: open
+                ? theme.transitions.duration.enteringScreen
+                : theme.transitions.duration.leavingScreen,
+            }),
             borderRight: "none",
             backgroundColor: theme.palette.background.default,
             boxShadow: theme.shadows[3],
-            transition: theme.transitions.create("width", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
           },
         }}
       >
@@ -201,6 +237,7 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabCh
                     primary={item.text}
                     sx={{
                       opacity: open ? 1 : 0,
+                      transition: "opacity 0.2s",
                       "& span": {
                         fontWeight: isActive ? "600" : "400",
                         color: isActive
