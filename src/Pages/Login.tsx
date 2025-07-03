@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { loginSuccess } from "../features/auth/authSlice";
-import { loginStudent } from "../api/studentApi";
+import axios from "axios";
 import {
   Box,
   Card,
@@ -37,13 +37,22 @@ const Login: React.FC = () => {
     const studentId = `${session}-${department}-${rollNumber}`;
 
     try {
-      const res = await loginStudent(studentId, password);
+      const response = await axios.post('http://localhost:5000/auth/login', {
+        studentId,
+        password,
+      });
+      
       dispatch(loginSuccess({ 
-        token: res.access_token, 
+        token: response.data.access_token, 
         role: "student",
         studentId 
       }));
-      localStorage.setItem("student", JSON.stringify(res.student));
+      
+      // Store student data in localStorage if needed
+      if (response.data.student) {
+        localStorage.setItem("student", JSON.stringify(response.data.student));
+      }
+      
       navigate("/home");
     } catch (error) {
       console.error("Login error:", error);

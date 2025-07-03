@@ -1,5 +1,3 @@
-// src/api/types.ts
-
 export interface StudentData {
   studentId: string;
   firstName: string;
@@ -8,7 +6,7 @@ export interface StudentData {
   department: string;
   rollNumber: string;
   email: string;
-  password?: string; // Keep password optional
+  password?: string;
 }
 
 export interface ClassData {
@@ -20,4 +18,14 @@ export interface ClassData {
   department: string;
   instructorId?: string;
   createdAt?: string;
+}
+
+export type EnrollmentStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Enrollment {
+  id: string;
+  student: StudentData | null;
+  class: ClassData;
+  status: EnrollmentStatus;
+  enrolledAt: string;
 }

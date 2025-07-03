@@ -1,67 +1,61 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, 
   TableRow, Typography, CircularProgress, Alert, Stack, Chip, IconButton, 
   Tooltip, MenuItem, Select, FormControl, InputLabel 
 } from '@mui/material';
 import { Refresh, CheckCircle, Cancel, Delete } from '@mui/icons-material';
-import { Enrollment, EnrollmentStatus, getAllEnrollments, updateEnrollmentStatus, deleteEnrollment } from '../api/enrollmentApi';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { 
+  fetchAllEnrollments, 
+  updateEnrollmentStatus, 
+  removeEnrollment,
+  EnrollmentStatus
+} from '../features/enrollment/enrollmentSlice';
+import { Enrollment } from '../api/types';
 
 const AdminEnrollmentsContent: React.FC = () => {
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { 
+    enrollments, 
+    loading, 
+    error 
+  } = useAppSelector((state) => state.enrollments);
+  
   const [statusFilter, setStatusFilter] = useState<EnrollmentStatus | 'all'>('all');
 
-  const loadEnrollments = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getAllEnrollments(statusFilter === 'all' ? undefined : statusFilter);
-      setEnrollments(data);
-    } catch (err) {
-      setError('Failed to load enrollments');
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
+  const loadEnrollments = () => {
+    dispatch(fetchAllEnrollments(statusFilter === 'all' ? undefined : statusFilter));
+  };
 
   useEffect(() => {
     loadEnrollments();
-  }, [loadEnrollments]);
+  }, [statusFilter]);
 
   const handleApprove = async (id: string) => {
     try {
-      setLoading(true);
-      await updateEnrollmentStatus(id, 'approved');
-      await loadEnrollments();
+      await dispatch(updateEnrollmentStatus({ id, status: 'approved' })).unwrap();
+      loadEnrollments();
     } catch (err) {
-      setError('Failed to approve enrollment');
-    } finally {
-      setLoading(false);
+      console.error('Failed to approve enrollment:', err);
     }
   };
 
   const handleReject = async (id: string) => {
     try {
-      setLoading(true);
-      await updateEnrollmentStatus(id, 'rejected');
-      await loadEnrollments();
+      await dispatch(updateEnrollmentStatus({ id, status: 'rejected' })).unwrap();
+      loadEnrollments();
     } catch (err) {
-      setError('Failed to reject enrollment');
-    } finally {
-      setLoading(false);
+      console.error('Failed to reject enrollment:', err);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      setLoading(true);
-      await deleteEnrollment(id);
-      await loadEnrollments();
+      await dispatch(removeEnrollment(id)).unwrap();
+      loadEnrollments();
     } catch (err) {
-      setError('Failed to delete enrollment');
-    } finally {
-      setLoading(false);
+      console.error('Failed to delete enrollment:', err);
     }
   };
 

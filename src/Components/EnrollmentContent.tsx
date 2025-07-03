@@ -14,8 +14,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
-import { ClassData } from "../api/classApi";
-import { Enrollment, EnrollmentStatus } from "../api/enrollmentApi";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { enrollStudent } from "../features/enrollment/enrollmentSlice";
 
@@ -34,6 +32,32 @@ interface EnrollmentContentProps {
   onDownload: () => void;
 }
 
+// Define types locally since we removed API file dependencies
+interface ClassData {
+  id: string;
+  title: string;
+  code: string;
+  semester: string;
+  session: string;
+  department: string;
+  instructorId?: string;
+  createdAt?: string;
+}
+
+type EnrollmentStatus = 'pending' | 'approved' | 'rejected';
+
+interface Enrollment {
+  id: string;
+  student: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+  } | null;
+  class: ClassData;
+  status: EnrollmentStatus;
+  enrolledAt: string;
+}
+
 const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
   studentInfo,
   classes,
@@ -45,10 +69,14 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
 
   const handleEnroll = async (classId: string) => {
     if (!studentInfo) return;
-    dispatch(enrollStudent({ 
-      studentId: studentInfo.studentId, 
-      classId 
-    }));
+    try {
+      await dispatch(enrollStudent({ 
+        studentId: studentInfo.studentId, 
+        classId 
+      })).unwrap();
+    } catch (err) {
+      console.error("Enrollment failed:", err);
+    }
   };
 
   const getStatus = (classId: string): EnrollmentStatus | 'not-enrolled' => {
@@ -56,7 +84,7 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
     return enrollment?.status || 'not-enrolled';
   };
 
-  const getChipColor = (status: EnrollmentStatus) => {
+  const getChipColor = (status: EnrollmentStatus | 'not-enrolled') => {
     switch (status) {
       case 'approved':
         return 'success';
@@ -83,16 +111,21 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
 
       {/* Student Information */}
       {studentInfo && (
-  <Paper sx={{ p: 3, mb: 4 }}>
-    <Typography variant="h6" gutterBottom>
-      Student ID: {studentInfo.studentId}
-    </Typography>
-    <Typography>
-      <strong>Name:</strong> {studentInfo.firstName} {studentInfo.lastName}
-    </Typography>
-    {/* Add similar safe access for other properties */}
-  </Paper>
-)}
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Student ID: {studentInfo.studentId}
+          </Typography>
+          <Typography>
+            <strong>Name:</strong> {studentInfo.firstName} {studentInfo.lastName}
+          </Typography>
+          <Typography>
+            <strong>Department:</strong> {studentInfo.department}
+          </Typography>
+          <Typography>
+            <strong>Session:</strong> {studentInfo.session}
+          </Typography>
+        </Paper>
+      )}
 
       {/* My Enrollments */}
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mt: 4, mb: 2 }}>

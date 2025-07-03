@@ -10,6 +10,14 @@ import { fetchEnrollments } from "../features/enrollment/enrollmentSlice";
 import { setActiveTab, setAcademicYear } from "../features/ui/uiSlice";
 import { SelectChangeEvent } from "@mui/material";
 
+interface CourseResult {
+  id: number; 
+  name: string;
+  code: string;
+  teacher: string;
+  grade: string;
+}
+
 const MainPage = () => {
   const dispatch = useAppDispatch();
   const { activeTab, academicYear } = useAppSelector((state) => state.ui);
@@ -19,10 +27,13 @@ const MainPage = () => {
   const { studentId } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    if (activeTab === "enrollment" && studentId) {
+    if (studentId) {
       dispatch(getStudent(studentId));
-      dispatch(getClasses());
-      dispatch(fetchEnrollments(studentId));
+      
+      if (activeTab === "enrollment") {
+        dispatch(getClasses());
+        dispatch(fetchEnrollments(studentId));
+      }
     }
   }, [activeTab, dispatch, studentId]);
 
@@ -34,6 +45,26 @@ const MainPage = () => {
     dispatch(setAcademicYear(event.target.value));
   };
 
+  const adaptedEnrollments = enrollments.map(enrollment => ({
+    ...enrollment,
+    student: enrollment.student ? {
+      id: enrollment.student.studentId,
+      firstName: enrollment.student.firstName,
+      lastName: enrollment.student.lastName
+    } : null
+  }));
+
+  // Updated mock data with numeric IDs
+  const mockCourses: CourseResult[] = [
+    {
+      id: 1,  // Now a number instead of string
+      name: "Computer Science 101",
+      code: "CS123",
+      teacher: "Ali Ahmed",
+      grade: "B+",
+    },
+  ];
+
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -43,7 +74,7 @@ const MainPage = () => {
           <EnrollmentContent
             studentInfo={student}
             classes={classes}
-            enrollments={enrollments}
+            enrollments={adaptedEnrollments}
             onDownload={handleDownloadForm}
           />
         );
@@ -52,15 +83,7 @@ const MainPage = () => {
           <ResultContent
             academicYear={academicYear}
             onYearChange={handleYearChange}
-            courses={[
-              {
-                id: 1,
-                name: "Computer Science 101",
-                code: "CS123",
-                teacher: "Ali Ahmed",
-                grade: "B+",
-              },
-            ]}
+            courses={mockCourses}
           />
         );
       default:
