@@ -1,33 +1,28 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../app/hooks";
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles: Array<string>;
+  allowedRoles: string[];
 }
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
 }) => {
   const navigate = useNavigate();
+  const { token, role } = useAppSelector((state) => state.auth);
+
   useEffect(() => {
-    const checkUserAuthorization = () => {
-      const token = localStorage.getItem("token");
-      const role = localStorage.getItem("role");
-      if (!token) {
-        navigate("/");
-      }
-      if (role) {
-        if (!allowedRoles.includes(role)) {
-          navigate("/");
-        }
-        // Automatically upgrade student role to admin if accessing admin routes
-        if (role === "admin" && window.location.pathname.startsWith("/admin")) {
-          return; // Allow access
-        }
-      }
-    };
-    checkUserAuthorization();
-  }, [allowedRoles, navigate]);
-  return <React.Fragment>{children}</React.Fragment>;
+    if (!token) {
+      navigate("/");
+    } else if (role && !allowedRoles.includes(role)) {
+      navigate("/");
+    }
+  }, [token, role, allowedRoles, navigate]);
+
+  return <>{children}</>;
 };
+
 export default ProtectedRoute;

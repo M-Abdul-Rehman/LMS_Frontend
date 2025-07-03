@@ -1,39 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  CircularProgress,
-  Alert,
-  Stack,
-  Chip,
-  IconButton,
-  Tooltip,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, 
+  TableRow, Typography, CircularProgress, Alert, Stack, Chip, IconButton, 
+  Tooltip, MenuItem, Select, FormControl, InputLabel 
 } from '@mui/material';
-import { 
-  Refresh, 
-  CheckCircle, 
-  Cancel,
-  Delete
-} from '@mui/icons-material';
-import { 
-  Enrollment, 
-  EnrollmentStatus,
-  getAllEnrollments,
-  updateEnrollmentStatus,
-  deleteEnrollment
-} from '../api/enrollmentApi';
+import { Refresh, CheckCircle, Cancel, Delete } from '@mui/icons-material';
+import { Enrollment, EnrollmentStatus, getAllEnrollments, updateEnrollmentStatus, deleteEnrollment } from '../api/enrollmentApi';
 
 const AdminEnrollmentsContent: React.FC = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -41,29 +13,27 @@ const AdminEnrollmentsContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<EnrollmentStatus | 'all'>('all');
 
-  const loadEnrollments = async () => {
+  const loadEnrollments = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getAllEnrollments(
-        statusFilter === 'all' ? undefined : statusFilter
-      );
+      const data = await getAllEnrollments(statusFilter === 'all' ? undefined : statusFilter);
       setEnrollments(data);
     } catch (err) {
       setError('Failed to load enrollments');
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
     loadEnrollments();
-  }, [statusFilter]);
+  }, [loadEnrollments]);
 
   const handleApprove = async (id: string) => {
     try {
       setLoading(true);
       await updateEnrollmentStatus(id, 'approved');
-      loadEnrollments();
+      await loadEnrollments();
     } catch (err) {
       setError('Failed to approve enrollment');
     } finally {
@@ -75,7 +45,7 @@ const AdminEnrollmentsContent: React.FC = () => {
     try {
       setLoading(true);
       await updateEnrollmentStatus(id, 'rejected');
-      loadEnrollments();
+      await loadEnrollments();
     } catch (err) {
       setError('Failed to reject enrollment');
     } finally {
@@ -87,7 +57,7 @@ const AdminEnrollmentsContent: React.FC = () => {
     try {
       setLoading(true);
       await deleteEnrollment(id);
-      loadEnrollments();
+      await loadEnrollments();
     } catch (err) {
       setError('Failed to delete enrollment');
     } finally {
@@ -97,28 +67,33 @@ const AdminEnrollmentsContent: React.FC = () => {
 
   const getChipColor = (status: EnrollmentStatus) => {
     switch (status) {
-      case 'approved':
-        return 'success';
-      case 'rejected':
-        return 'error';
-      case 'pending':
-        return 'warning';
-      default:
-        return 'default';
+      case 'approved': return 'success';
+      case 'rejected': return 'error';
+      case 'pending': return 'warning';
+      default: return 'default';
     }
+  };
+
+  const getStudentName = (enrollment: Enrollment) => {
+    return enrollment.student 
+      ? `${enrollment.student.firstName} ${enrollment.student.lastName}`
+      : "Unknown Student";
+  };
+
+  const getStudentId = (enrollment: Enrollment) => {
+    return enrollment.student?.studentId || "N/A";
   };
 
   return (
     <>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h5">Enrollment Requests</Typography>
-        
         <Stack direction="row" spacing={2} alignItems="center">
           <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Status</InputLabel>
             <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value as EnrollmentStatus | 'all')}
               label="Status"
             >
               <MenuItem value="all">All</MenuItem>
@@ -127,7 +102,6 @@ const AdminEnrollmentsContent: React.FC = () => {
               <MenuItem value="rejected">Rejected</MenuItem>
             </Select>
           </FormControl>
-          
           <Button
             variant="outlined"
             startIcon={<Refresh />}
@@ -163,9 +137,9 @@ const AdminEnrollmentsContent: React.FC = () => {
                 enrollments.map((enrollment) => (
                   <TableRow key={enrollment.id}>
                     <TableCell>
-                      {enrollment.student.firstName} {enrollment.student.lastName}
+                      {getStudentName(enrollment)}
                       <Typography variant="body2" color="textSecondary">
-                        ID: {enrollment.student.studentId}
+                        ID: {getStudentId(enrollment)}
                       </Typography>
                     </TableCell>
                     <TableCell>{enrollment.class.title}</TableCell>

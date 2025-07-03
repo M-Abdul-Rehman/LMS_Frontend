@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { ClassData } from './classApi';
-import { StudentData } from './studentApi';
+import { StudentData } from './types';
 
 export type EnrollmentStatus = 'pending' | 'approved' | 'rejected';
 
 export interface Enrollment {
   id: string;
-  student: StudentData;
+  student: StudentData | null;
   class: ClassData;
   status: EnrollmentStatus;
   enrolledAt: string;
