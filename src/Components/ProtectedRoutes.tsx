@@ -16,7 +16,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     if (!token) {
-      navigate("/");
+      if (allowedRoles.includes("admin")) {
+        navigate("/admin-login");
+      } else {
+        navigate("/");
+      }
     } else if (role && !allowedRoles.includes(role)) {
       navigate("/");
     }

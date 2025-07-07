@@ -5,6 +5,7 @@ import MainPage from "./Pages/MainPage";
 import AdminPage from "./Pages/admin/AdminPage";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
+import AdminLoginModal from "./Components/AdminLoginModal";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/admin-login" element={<AdminLoginModal />} />
             <Route
               path="/admin"
               element={

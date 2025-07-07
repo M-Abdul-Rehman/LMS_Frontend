@@ -26,6 +26,8 @@ import {
   BarChart as BarChartIcon,
   Settings as SettingsIcon,
 } from "@mui/icons-material";
+import { logout } from '../features/auth/authSlice';
+import { useDispatch } from 'react-redux';
 
 interface AdminNavDrawerProps {
   open: boolean;
@@ -129,12 +131,12 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabCh
       iconColor: theme.palette.error.main,
     },
   ];
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("token");
-    window.location.href = "/";
-  };
+  dispatch(logout());
+  window.location.href = "/";
+};
 
   return (
     <>
