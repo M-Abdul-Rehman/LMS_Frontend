@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchAllClasses, ClassData } from '../../api/classApi';
+import axios from 'axios';
 
 interface ClassState {
   classes: ClassData[];
@@ -13,11 +13,48 @@ const initialState: ClassState = {
   error: null,
 };
 
+export interface ClassData {
+  id: string;
+  title: string;
+  code: string;
+  semester: string;
+  session: string;
+  department: string;
+  instructorId?: string;
+  createdAt?: string;
+}
+
+const BASE_URL = 'http://localhost:5000/classes';
+
 export const getClasses = createAsyncThunk(
   'class/fetchClasses',
   async () => {
-    const response = await fetchAllClasses();
-    return response;
+    const response = await axios.get(BASE_URL);
+    return response.data;
+  }
+);
+
+export const registerClass = createAsyncThunk(
+  'class/registerClass',
+  async (cls: Omit<ClassData, 'id'>) => {
+    const response = await axios.post(BASE_URL, cls);
+    return response.data;
+  }
+);
+
+export const updateClass = createAsyncThunk(
+  'class/updateClass',
+  async ({ id, data }: { id: string; data: Partial<ClassData> }) => {
+    const response = await axios.put(`${BASE_URL}/${id}`, data);
+    return response.data;
+  }
+);
+
+export const deleteClass = createAsyncThunk(
+  'class/deleteClass',
+  async (id: string) => {
+    await axios.delete(`${BASE_URL}/${id}`);
+    return id;
   }
 );
 
@@ -27,6 +64,7 @@ const classSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Get Classes
       .addCase(getClasses.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -38,6 +76,21 @@ const classSlice = createSlice({
       .addCase(getClasses.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch classes';
+      })
+      // Register Class
+      .addCase(registerClass.fulfilled, (state, action) => {
+        state.classes.push(action.payload);
+      })
+      // Update Class
+      .addCase(updateClass.fulfilled, (state, action) => {
+        const index = state.classes.findIndex(c => c.id === action.payload.id);
+        if (index !== -1) {
+          state.classes[index] = action.payload;
+        }
+      })
+      // Delete Class
+      .addCase(deleteClass.fulfilled, (state, action) => {
+        state.classes = state.classes.filter(c => c.id !== action.payload);
       });
   },
 });

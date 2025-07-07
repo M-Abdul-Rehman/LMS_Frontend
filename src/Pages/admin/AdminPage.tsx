@@ -14,13 +14,18 @@ import AdminRecentActivity from "../../Components/AdminRecentActivity";
 import AdminStudentsContent from "../../Components/AdminStudentsContent";
 import AdminClassesContent from "../../Components/AdminClassesContent";
 import AdminEnrollmentsContent from "../../Components/AdminEnrollmentsContent";
-import { fetchAdminStudents, fetchAdminClasses } from "../../features/admin/adminSlice";
+import { 
+  fetchAdminStudents, 
+  fetchAdminClasses,
+  registerStudent,
+  updateStudent,
+  deleteStudent,
+  registerClass,
+  updateClass,
+  deleteClass
+} from "../../features/admin/adminSlice";
 import { setActiveTab, setIsLoading } from "../../features/ui/uiSlice";
-import { StudentData } from "../../api/types";
-import { ClassData } from "../../api/classApi";
-import { registerStudent, updateStudent, deleteStudent } from "../../api/studentApi";
-import { registerClass, updateClass, deleteClass } from "../../api/classApi";
-
+import { ClassData, StudentData } from "../../api/types";
 
 const AdminPage = () => {
   const theme = useTheme();
@@ -42,7 +47,7 @@ const AdminPage = () => {
 
   const handleAddStudent = async (studentData: StudentData) => {
     try {
-      await registerStudent(studentData);
+      await dispatch(registerStudent(studentData)).unwrap();
       dispatch(fetchAdminStudents());
       return true;
     } catch (err) {
@@ -53,7 +58,7 @@ const AdminPage = () => {
 
   const handleUpdateStudent = async (studentId: string, data: Partial<StudentData>) => {
     try {
-      await updateStudent(studentId, data);
+      await dispatch(updateStudent({ studentId, data })).unwrap();
       dispatch(fetchAdminStudents());
       return true;
     } catch (err) {
@@ -64,7 +69,7 @@ const AdminPage = () => {
 
   const handleDeleteStudent = async (studentId: string) => {
     try {
-      await deleteStudent(studentId);
+      await dispatch(deleteStudent(studentId)).unwrap();
       dispatch(fetchAdminStudents());
       return true;
     } catch (err) {
@@ -75,7 +80,7 @@ const AdminPage = () => {
 
   const handleAddClass = async (classData: Omit<ClassData, 'id'>) => {
     try {
-      await registerClass(classData);
+      await dispatch(registerClass(classData)).unwrap();
       dispatch(fetchAdminClasses());
       return true;
     } catch (err) {
@@ -86,7 +91,7 @@ const AdminPage = () => {
 
   const handleUpdateClass = async (classId: string, data: Partial<ClassData>) => {
     try {
-      await updateClass(classId, data);
+      await dispatch(updateClass({ id: classId, data })).unwrap();
       dispatch(fetchAdminClasses());
       return true;
     } catch (err) {
@@ -97,7 +102,7 @@ const AdminPage = () => {
 
   const handleDeleteClass = async (classId: string) => {
     try {
-      await deleteClass(classId);
+      await dispatch(deleteClass(classId)).unwrap();
       dispatch(fetchAdminClasses());
       return true;
     } catch (err) {
