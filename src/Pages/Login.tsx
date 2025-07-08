@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import { loginSuccess } from "../features/auth/authSlice";
+import axios from "axios";
 import {
   Box,
   Card,
@@ -12,36 +16,48 @@ import {
   FormControl,
   Typography,
 } from "@mui/material";
-import { fetchStudentById } from "../api/studentApi";
-import { useNavigate } from "react-router";
 
 const sessions = ["Fa2020", "Fa2021", "Fa2022", "Fa2023"];
 const departments = ["CS", "EE", "ME", "CE"];
 
-function Login() {
+const Login: React.FC = () => {
   const [session, setSession] = useState("");
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [password, setPassword] = useState("");
-  let navigate = useNavigate();
-  const handleLogin = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
     if (!session || !department || !rollNumber || !password) {
       alert("Please fill all fields");
       return;
     }
+
     const studentId = `${session}-${department}-${rollNumber}`;
-    fetchStudentById(studentId)
-      .then((student) => {
-        if (student.studentId && student.password === password) {
-          navigate("/home")
-        } else {
-          alert("Invalid credentials");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching students:", error);
-        alert("Login failed. Please try again.");
+
+    try {
+      const response = await axios.post('http://localhost:5000/auth/login', {
+        studentId,
+        password,
       });
+      
+      dispatch(loginSuccess({ 
+        token: response.data.access_token, 
+        role: "student",
+        studentId 
+      }));
+      
+      // Store student data in localStorage if needed
+      if (response.data.student) {
+        localStorage.setItem("student", JSON.stringify(response.data.student));
+      }
+      
+      navigate("/home");
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Invalid credentials. Please try again.");
+    }
   };
 
   const styles = {
@@ -128,6 +144,6 @@ function Login() {
       </Card>
     </Box>
   );
-}
+};
 
 export default Login;
