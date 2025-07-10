@@ -1,4 +1,3 @@
-// src/Components/admin/AdminStudentsContent.tsx
 import {
   Box,
   Button,
@@ -22,7 +21,7 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete, Refresh } from "@mui/icons-material";
 import { StudentData } from "../api/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AdminStudentsContentProps {
   students: StudentData[];
@@ -46,8 +45,7 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<StudentData | null>(null);
-  const [formData, setFormData] = useState<StudentData>({
-    studentId: '',
+  const [formData, setFormData] = useState<Partial<StudentData>>({
     firstName: '',
     lastName: '',
     session: '',
@@ -56,6 +54,16 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
     email: '',
     password: '',
   });
+  const [studentIdPreview, setStudentIdPreview] = useState('');
+
+  // Generate student ID preview when form data changes
+  useEffect(() => {
+    if (formData.session && formData.department && formData.rollNumber) {
+      setStudentIdPreview(`${formData.session}-${formData.department}-${formData.rollNumber}`);
+    } else {
+      setStudentIdPreview('');
+    }
+  }, [formData.session, formData.department, formData.rollNumber]);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -64,7 +72,6 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
   const handleAddClick = () => {
     setCurrentStudent(null);
     setFormData({
-      studentId: '',
       firstName: '',
       lastName: '',
       session: '',
@@ -79,7 +86,6 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
   const handleEditClick = (student: StudentData) => {
     setCurrentStudent(student);
     setFormData({
-      studentId: student.studentId || '',
       firstName: student.firstName || '',
       lastName: student.lastName || '',
       session: student.session || '',
@@ -97,11 +103,19 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
   };
 
   const handleSubmit = async () => {
+    // Generate student ID from session, department, and roll number
+    const studentId = `${formData.session}-${formData.department}-${formData.rollNumber}`;
+    
+    const studentPayload = {
+      ...formData,
+      studentId,
+    };
+
     if (currentStudent) {
-      const success = await onUpdateStudent(currentStudent.studentId!, formData);
+      const success = await onUpdateStudent(currentStudent.studentId!, studentPayload);
       if (success) setModalOpen(false);
     } else {
-      const success = await onAddStudent(formData);
+      const success = await onAddStudent(studentPayload as StudentData);
       if (success) setModalOpen(false);
     }
   };
@@ -197,56 +211,67 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
           {currentStudent ? 'Edit Student' : 'Add New Student'}
         </DialogTitle>
         <DialogContent>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              margin="dense"
+              label="First Name"
+              name="firstName"
+              fullWidth
+              required
+              value={formData.firstName}
+              onChange={handleFormChange}
+            />
+            <TextField
+              margin="dense"
+              label="Last Name"
+              name="lastName"
+              fullWidth
+              required
+              value={formData.lastName}
+              onChange={handleFormChange}
+            />
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              margin="dense"
+              label="Session"
+              name="session"
+              fullWidth
+              required
+              value={formData.session}
+              onChange={handleFormChange}
+            />
+            <TextField
+              margin="dense"
+              label="Department"
+              name="department"
+              fullWidth
+              required
+              value={formData.department}
+              onChange={handleFormChange}
+            />
+            <TextField
+              margin="dense"
+              label="Roll Number"
+              name="rollNumber"
+              fullWidth
+              required
+              value={formData.rollNumber}
+              onChange={handleFormChange}
+            />
+          </Box>
+          
           <TextField
             margin="dense"
-            label="First Name"
-            name="firstName"
+            label="Student ID"
             fullWidth
-            required
-            value={formData.firstName}
-            onChange={handleFormChange}
+            value={studentIdPreview}
+            disabled
             sx={{ mb: 2 }}
+            helperText="Auto-generated from Session, Department, and Roll Number"
           />
-          <TextField
-            margin="dense"
-            label="Last Name"
-            name="lastName"
-            fullWidth
-            required
-            value={formData.lastName}
-            onChange={handleFormChange}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label="Session"
-            name="session"
-            fullWidth
-            required
-            value={formData.session}
-            onChange={handleFormChange}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label="Department"
-            name="department"
-            fullWidth
-            required
-            value={formData.department}
-            onChange={handleFormChange}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label="Roll Number"
-            name="rollNumber"
-            fullWidth
-            required
-            value={formData.rollNumber}
-            onChange={handleFormChange}
-            sx={{ mb: 2 }}
-          />
+          
           <TextField
             margin="dense"
             label="Email"
@@ -258,6 +283,7 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
             onChange={handleFormChange}
             sx={{ mb: 2 }}
           />
+          
           <TextField
             margin="dense"
             label="Password"
@@ -284,6 +310,8 @@ const AdminStudentsContent: React.FC<AdminStudentsContentProps> = ({
         <DialogContent>
           <Typography>
             Are you sure you want to delete {currentStudent?.firstName} {currentStudent?.lastName}?
+            <br />
+            <strong>Student ID: {currentStudent?.studentId}</strong>
             <br />
             <strong>This action cannot be undone.</strong>
           </Typography>

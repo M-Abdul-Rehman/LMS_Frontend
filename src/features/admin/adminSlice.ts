@@ -16,7 +16,7 @@ const initialState: AdminState = {
   error: null,
 };
 
-const BASE_URL = 'https://lmsbackend-production-6d1b.up.railway.app/';
+const BASE_URL = 'https://lmsbackend-production-6d1b.up.railway.app';
 
 export const fetchAdminStudents = createAsyncThunk(
   'admin/fetchStudents',

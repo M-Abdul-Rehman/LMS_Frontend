@@ -24,7 +24,7 @@ export interface ClassData {
   createdAt?: string;
 }
 
-const BASE_URL = 'http://localhost:5000/classes';
+const BASE_URL = 'https://lmsbackend-production-6d1b.up.railway.app/classes';
 
 export const getClasses = createAsyncThunk(
   'class/fetchClasses',

@@ -1,3 +1,4 @@
+
 import { 
   Typography,
   Paper,
@@ -12,10 +13,13 @@ import {
   Box,
   Chip,
   CircularProgress,
+  Snackbar,
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { enrollStudent } from "../features/enrollment/enrollmentSlice";
+import { enrollStudent, fetchEnrollments } from "../features/enrollment/enrollmentSlice";
+import { useState, useEffect } from "react";
+import { getClasses } from "../features/class/classSlice";
 
 interface EnrollmentContentProps {
   studentInfo: {
@@ -32,7 +36,6 @@ interface EnrollmentContentProps {
   onDownload: () => void;
 }
 
-// Define types locally since we removed API file dependencies
 interface ClassData {
   id: string;
   title: string;
@@ -60,22 +63,48 @@ interface Enrollment {
 
 const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
   studentInfo,
-  classes,
-  enrollments,
   onDownload,
 }) => {
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.enrollments);
+  const { enrollments, loading: enrollmentLoading, error } = useAppSelector((state) => state.enrollments);
+  const { classes, loading: classLoading } = useAppSelector((state) => state.classes);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [enrollmentStatus, setEnrollmentStatus] = useState<Record<string, 'loading' | 'idle'>>({});
+
+  // Fetch data on component mount
+  useEffect(() => {
+    if (studentInfo?.studentId) {
+      dispatch(fetchEnrollments(studentInfo.studentId));
+      dispatch(getClasses());
+    }
+  }, [dispatch, studentInfo]);
+
+  useEffect(() => {
+    if (error) {
+      setErrorMessage(error);
+      setSnackbarOpen(true);
+    }
+  }, [error]);
 
   const handleEnroll = async (classId: string) => {
     if (!studentInfo) return;
+    
     try {
+      setEnrollmentStatus(prev => ({ ...prev, [classId]: 'loading' }));
       await dispatch(enrollStudent({ 
         studentId: studentInfo.studentId, 
         classId 
       })).unwrap();
-    } catch (err) {
+      
+      // Refresh enrollments after successful enrollment
+      dispatch(fetchEnrollments(studentInfo.studentId));
+    } catch (err: any) {
       console.error("Enrollment failed:", err);
+      setErrorMessage(err.message || "Enrollment failed. Please try again.");
+      setSnackbarOpen(true);
+    } finally {
+      setEnrollmentStatus(prev => ({ ...prev, [classId]: 'idle' }));
     }
   };
 
@@ -86,16 +115,18 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
 
   const getChipColor = (status: EnrollmentStatus | 'not-enrolled') => {
     switch (status) {
-      case 'approved':
-        return 'success';
-      case 'rejected':
-        return 'error';
-      case 'pending':
-        return 'warning';
-      default:
-        return 'default';
+      case 'approved': return 'success';
+      case 'rejected': return 'error';
+      case 'pending': return 'warning';
+      default: return 'default';
     }
   };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
+  const isLoading = enrollmentLoading || classLoading;
 
   return (
     <>
@@ -103,11 +134,17 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
         Course Enrollment
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 4 }}>
-          {error}
+      {/* Error Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+          {errorMessage || "An error occurred. Please try again."}
         </Alert>
-      )}
+      </Snackbar>
 
       {/* Student Information */}
       {studentInfo && (
@@ -132,7 +169,7 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
         My Enrollments
       </Typography>
 
-      {loading ? (
+      {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </Box>
@@ -163,7 +200,7 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
               ) : (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
-                    No enrollments yet
+                    No enrollments found
                   </TableCell>
                 </TableRow>
               )}
@@ -177,10 +214,14 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
         Available Courses
       </Typography>
 
-      {loading ? (
+      {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </Box>
+      ) : classes.length === 0 ? (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          No courses available for enrollment at this time
+        </Alert>
       ) : (
         <TableContainer component={Paper} sx={{ mb: 2 }}>
           <Table>
@@ -195,43 +236,41 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {classes.length > 0 ? (
-                classes.map((cls) => {
-                  const status = getStatus(cls.id);
-                  return (
-                    <TableRow key={cls.id}>
-                      <TableCell>{cls.code}</TableCell>
-                      <TableCell>{cls.title}</TableCell>
-                      <TableCell>{cls.department}</TableCell>
-                      <TableCell>{cls.session}</TableCell>
-                      <TableCell>{cls.semester}</TableCell>
-                      <TableCell>
-                        {status === 'not-enrolled' ? (
-                          <Button
-                            variant="contained"
-                            size="small"
-                            onClick={() => handleEnroll(cls.id)}
-                            disabled={loading}
-                          >
-                            Enroll
-                          </Button>
-                        ) : (
-                          <Chip
-                            label={status}
-                            color={getChipColor(status as EnrollmentStatus)}
-                          />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No courses available
-                  </TableCell>
-                </TableRow>
-              )}
+              {classes.map((cls) => {
+                const status = getStatus(cls.id);
+                const isEnrolling = enrollmentStatus[cls.id] === 'loading';
+                
+                return (
+                  <TableRow key={cls.id}>
+                    <TableCell>{cls.code}</TableCell>
+                    <TableCell>{cls.title}</TableCell>
+                    <TableCell>{cls.department}</TableCell>
+                    <TableCell>{cls.session}</TableCell>
+                    <TableCell>{cls.semester}</TableCell>
+                    <TableCell>
+                      {status === 'not-enrolled' ? (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleEnroll(cls.id)}
+                          disabled={isEnrolling}
+                        >
+                          {isEnrolling ? (
+                            <CircularProgress size={24} />
+                          ) : (
+                            "Enroll"
+                          )}
+                        </Button>
+                      ) : (
+                        <Chip
+                          label={status}
+                          color={getChipColor(status as EnrollmentStatus)}
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -242,6 +281,7 @@ const EnrollmentContent: React.FC<EnrollmentContentProps> = ({
           variant="contained"
           startIcon={<Download />}
           onClick={onDownload}
+          disabled={isLoading}
         >
           Generate Enrollment Form
         </Button>

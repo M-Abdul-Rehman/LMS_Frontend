@@ -14,7 +14,7 @@ const initialState: StudentState = {
   error: null,
 };
 
-const BASE_URL = 'http://localhost:5000/students';
+const BASE_URL = 'https://lmsbackend-production-6d1b.up.railway.app/students';
 
 export const getStudent = createAsyncThunk(
   'student/fetchStudent',

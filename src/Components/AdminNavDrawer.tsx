@@ -23,8 +23,6 @@ import {
   People as PeopleIcon,
   School as SchoolIcon,
   Assignment as AssignmentIcon,
-  BarChart as BarChartIcon,
-  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { logout } from '../features/auth/authSlice';
 import { useDispatch } from 'react-redux';
@@ -117,18 +115,6 @@ const AdminNavDrawer: React.FC<AdminNavDrawerProps> = ({ open, onToggle, onTabCh
       icon: <AssignmentIcon />,
       tab: "enrollments",
       iconColor: theme.palette.warning.main,
-    },
-    {
-      text: "Reports",
-      icon: <BarChartIcon />,
-      tab: "reports",
-      iconColor: theme.palette.info.main,
-    },
-    {
-      text: "Settings",
-      icon: <SettingsIcon />,
-      tab: "settings",
-      iconColor: theme.palette.error.main,
     },
   ];
   const dispatch = useDispatch();

@@ -24,12 +24,14 @@ const initialState: EnrollmentState = {
   error: null,
 };
 
-const BASE_URL = 'http://localhost:5000/enrollments';
+const BASE_URL = 'https://lmsbackend-production-6d1b.up.railway.app/enrollments';
 
 export const fetchEnrollments = createAsyncThunk(
   'enrollment/fetchEnrollments',
   async (studentId: string) => {
-    const response = await axios.get(BASE_URL, { params: { studentId } });
+    const response = await axios.get(BASE_URL, { 
+      params: { studentStringId: studentId } // Use new param name
+    });
     return response.data;
   }
 );
@@ -38,8 +40,8 @@ export const enrollStudent = createAsyncThunk(
   'enrollment/requestEnrollment',
   async ({ studentId, classId }: { studentId: string; classId: string }) => {
     await axios.post(BASE_URL, { 
-      student: { id: studentId }, 
-      class: { id: classId } 
+      studentId, 
+      classId 
     });
     const response = await axios.get(BASE_URL, { params: { studentId } });
     return response.data;

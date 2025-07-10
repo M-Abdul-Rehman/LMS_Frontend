@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { 
   Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, 
   TableRow, Typography, CircularProgress, Alert, Stack, Chip, IconButton, 
@@ -24,13 +24,15 @@ const AdminEnrollmentsContent: React.FC = () => {
   
   const [statusFilter, setStatusFilter] = useState<EnrollmentStatus | 'all'>('all');
 
-  const loadEnrollments = () => {
+  // Wrap loadEnrollments in useCallback to memoize it
+  const loadEnrollments = useCallback(() => {
     dispatch(fetchAllEnrollments(statusFilter === 'all' ? undefined : statusFilter));
-  };
+  }, [dispatch, statusFilter]);
 
   useEffect(() => {
     loadEnrollments();
-  }, [statusFilter]);
+  }, [loadEnrollments]); // Now we can safely include loadEnrollments in dependencies
+
 
   const handleApprove = async (id: string) => {
     try {

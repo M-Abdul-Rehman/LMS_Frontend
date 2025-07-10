@@ -15,7 +15,10 @@ import {
   InputLabel,
   FormControl,
   Typography,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const sessions = ["Fa2020", "Fa2021", "Fa2022", "Fa2023"];
 const departments = ["CS", "EE", "ME", "CE"];
@@ -25,38 +28,43 @@ const Login: React.FC = () => {
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setError(null); // Reset previous errors
+    
     if (!session || !department || !rollNumber || !password) {
-      alert("Please fill all fields");
+      setError("Please fill all fields");
       return;
     }
 
-    const studentId = `${session}-${department}-${rollNumber}`;
+    const username = `${session}-${department}-${rollNumber}`;
 
     try {
-      const response = await axios.post('http://localhost:5000/auth/login', {
-        studentId,
-        password,
-      });
+      const response = await axios.post(
+        "https://lmsbackend-production-6d1b.up.railway.app/auth/login",
+        { username, password } 
+      );
+
+      // Extract role from response
+      const role = response.data.user?.role || "student";
       
       dispatch(loginSuccess({ 
         token: response.data.access_token, 
-        role: "student",
-        studentId 
+        role,
+        studentId: username
       }));
       
-      // Store student data in localStorage if needed
-      if (response.data.student) {
-        localStorage.setItem("student", JSON.stringify(response.data.student));
-      }
-      
-      navigate("/home");
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Invalid credentials. Please try again.");
+      navigate(role === "admin" ? "/admin" : "/home");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message || 
+        "Invalid credentials. Please try again."
+      );
     }
   };
 
@@ -66,28 +74,41 @@ const Login: React.FC = () => {
       backgroundSize: "cover",
       display: "flex",
       justifyContent: "center",
+      alignItems: "center",
       height: "100vh",
     },
     card: {
       width: 400,
-      margin: "auto",
       padding: "20px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-      borderRadius: "20px",
-      backgroundColor: "#fff",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
+      borderRadius: "16px",
+      backgroundColor: "rgba(255, 255, 255, 0.92)",
+      backdropFilter: "blur(10px)",
+    },
+    errorText: {
+      color: "#d32f2f",
+      textAlign: "center",
+      fontWeight: 500,
+      marginBottom: "10px",
+    },
+    loginButton: {
+      marginTop: "8px",
+      padding: "10px 20px",
+      fontWeight: "bold",
+      background: "linear-gradient(45deg, #1976d2 30%, #21a1f1 90%)",
     },
   };
 
   return (
     <Box sx={styles.container}>
-      <Card variant="outlined" sx={styles.card}>
+      <Card sx={styles.card}>
         <CardContent>
-          <Typography variant="h5" align="center" gutterBottom>
-            Login
+          <Typography variant="h4" align="center" gutterBottom sx={{ mb: 3, fontWeight: 700 }}>
+            University LMS
           </Typography>
-
+          
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <FormControl fullWidth>
+            <FormControl fullWidth error={!session && !!error}>
               <InputLabel>Session</InputLabel>
               <Select
                 value={session}
@@ -102,7 +123,7 @@ const Login: React.FC = () => {
               </Select>
             </FormControl>
 
-            <FormControl fullWidth>
+            <FormControl fullWidth error={!department && !!error}>
               <InputLabel>Department</InputLabel>
               <Select
                 value={department}
@@ -123,22 +144,49 @@ const Login: React.FC = () => {
               fullWidth
               value={rollNumber}
               onChange={(e) => setRollNumber(e.target.value)}
+              error={!rollNumber && !!error}
+              helperText={!rollNumber && !!error ? "Required" : ""}
             />
 
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               variant="outlined"
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              error={!password && !!error}
+              helperText={!password && !!error ? "Required" : ""}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
             />
           </Box>
         </CardContent>
 
-        <CardActions sx={{ justifyContent: "center" }}>
-          <Button variant="contained" color="primary" onClick={handleLogin}>
-            Login
+        <CardActions sx={{ flexDirection: "column", px: 2 }}>
+          {error && (
+            <Typography variant="body2" sx={styles.errorText}>
+              {error}
+            </Typography>
+          )}
+          
+          <Button 
+            fullWidth 
+            variant="contained" 
+            onClick={handleLogin}
+            sx={styles.loginButton}
+          >
+            Sign In
           </Button>
         </CardActions>
       </Card>
